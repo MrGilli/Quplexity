@@ -1,6 +1,15 @@
 clear
 #cd qc
-cd compiler
-gcc main.c ../qc/quantum.c -o quantum_sim -lm
-./quantum_sim
+
+#Assembler 
+cd ASM
+nasm -f elf64 -o module.o module.asm
+##
+
+cd ../compiler
+g++ main.cpp ../qc/quantum.cpp ../ASM/module.o -o qcvm
+
+./qcvm
+
+
 cd ../
