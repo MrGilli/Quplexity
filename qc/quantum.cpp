@@ -2,9 +2,11 @@
 #include <cstdlib> // For malloc and free
 #include <cmath>   // For pow and cabs
 
+extern "C" int calculate_dimension_(int numQubits);
+
 // Initialize quantum state
 Complex* initializeState(int numQubits) {
-    int dimension = 1 << numQubits; // 2^numQubits
+    int dimension = calculate_dimension_(numQubits);
     Complex *stateVector = new Complex[dimension];
     for (int i = 0; i < dimension; i++) {
         stateVector[i] = Complex(0.0, 0.0);
@@ -15,7 +17,7 @@ Complex* initializeState(int numQubits) {
 
 // Apply a single qubit gate
 void applySingleQubitGate(Complex *stateVector, int numQubits, Complex gate[2][2], int targetQubit) {
-    int dimension = 1 << numQubits;
+    int dimension = calculate_dimension_(numQubits);
     Complex *newStateVector = new Complex[dimension];
 
     for (int i = 0; i < dimension; i++) {
@@ -33,7 +35,7 @@ void applySingleQubitGate(Complex *stateVector, int numQubits, Complex gate[2][2
 
 // Measure a qubit
 int measureQubit(Complex *stateVector, int numQubits, int targetQubit) {
-    int dimension = 1 << numQubits;
+    int dimension = calculate_dimension_(numQubits);
     double probability0 = 0.0;
 
     for (int i = 0; i < dimension; i++) {

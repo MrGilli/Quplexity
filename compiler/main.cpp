@@ -36,11 +36,11 @@ void square() {
 
     a = 10; b = 20; c = 30; d = 18;
     result = IntegerAddSub_(a, b, c, d);
-    PrintResult("Test 1", a, b, c, d, result);
+    //PrintResult("Test 1", a, b, c, d, result);
 
     a = 101; b = 34; c = -190; d = 25;
     result = IntegerAddSub_(a, b, c, d);
-    PrintResult("Test 2", a, b, c, d, result);
+    //PrintResult("Test 2", a, b, c, d, result);
 }
 
 int main() {
