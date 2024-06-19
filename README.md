@@ -17,7 +17,6 @@ Install the following to build/run TurboQ on your machine:
 ### Executing program
 
 * How to run the program
-* Step-by-step bullets
 ```
 bash run.sh
 ```
