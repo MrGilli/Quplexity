@@ -32,5 +32,5 @@ chmod +x run.sh
 
 ## Authors
 
-Jacob L Gill  
+Jacob Gill  
 contact: jacobygill@outlook.com
