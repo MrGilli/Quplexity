@@ -47,7 +47,7 @@ int main() {
     //square();
     bool normal_input = true;
     char cmd[256];
-    cout << "QCVM - Quantum Computer Virtual Machine." << endl;
+    cout << "TurboQ - Blazingly Fast Quantum Computer Simulation Software." << endl;
     cout << "Type 'help' to list commands." << endl;
     while (normal_input) {
         cout << "$ ";
