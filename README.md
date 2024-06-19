@@ -1,6 +1,6 @@
 # TurboQ
 
-TurboQ is a blazingly fast application that is used to simulate QC's and their logic.
+TurboQ is a blazingly fast and lightweight application that is used to simulate QC's and their logic.
 TurboQ is written in C++ and x86_64 Assembly for insanely fast execution times. 
 
 ## Description
