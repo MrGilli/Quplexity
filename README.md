@@ -14,24 +14,21 @@ Install the following to build/run TurboQ on your machine:
 * nasm (assembly compiler)
 * gcc & g++
 
-### Installing
-
-* How/where to download your program
-* Any modifications needed to be made to files/folders
-
 ### Executing program
 
 * How to run the program
 * Step-by-step bullets
 ```
-code blocks for commands
+bash run.sh
+```
+or
+
+```
+chmod +x run.sh
 ```
 
-## Help
-
-Any advise for common problems or issues.
 ```
-command to run if program contains helper info
+./run.sh
 ```
 
 ## Authors
