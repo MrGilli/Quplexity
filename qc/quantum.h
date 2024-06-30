@@ -1,18 +1,18 @@
-#ifndef QUANTUM
-#define QUANTUM
+#ifndef QUANTUM_H
+#define QUANTUM_H
 
-#include <complex> // Include for complex numbers in C++
-using namespace std; // Use std namespace for convenience
+#include <complex>
 
-// Define a complex number type using C++'s complex library
-typedef complex<double> Complex;
+using Complex = std::complex<double>;
 
-// Function declarations
-Complex* initializeState(int numQubits);
-void applySingleQubitGate(Complex *stateVector, int numQubits, Complex gate[2][2], int targetQubit);
+struct QuantumState {
+    int numQubits;
+    Complex *stateVector;
+};
+
+QuantumState* initializeState(int numQubits);
+void applySingleQubitGate(QuantumState *qs, Complex gate[2][2], int targetQubit);
+void printQuantumState(QuantumState *qs);
 int measureQubit(Complex *stateVector, int numQubits, int targetQubit);
-
-// Common gates
-extern Complex hadamard[2][2];
 
 #endif
