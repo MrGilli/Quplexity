@@ -2,23 +2,24 @@
 #include <cstring>
 #include <cmath>
 #include "../qc/quantum.h"
+#include "./errors.h"
 
 using namespace std;
 
 extern "C" int IntegerAddSub_(int a, int b, int c, int d);
 
 int extractNumber(const char *input) {
-    const char *start = strchr(input, '['); // Find the first occurrence of '['
-    const char *end = strchr(input, ']');   // Find the first occurrence of ']'
+    const char *start = strchr(input, '[');
+    const char *end = strchr(input, ']');
 
     if (start != nullptr && end != nullptr && end > start) {
-        char numberStr[16]; // Buffer to hold the number string
+        char numberStr[16];
         strncpy(numberStr, start + 1, end - start - 1);
-        numberStr[end - start - 1] = '\0'; // Null-terminate the string
-        return atoi(numberStr); // Convert the number string to an integer
+        numberStr[end - start - 1] = '\0';
+        return atoi(numberStr);
     }
 
-    return -1; // Return -1 if the format is invalid
+    return -1;
 }
 
 void PrintResult(const char* msg, int a, int b, int c, int d, int result) {
@@ -36,23 +37,22 @@ void square() {
 
     a = 10; b = 20; c = 30; d = 18;
     result = IntegerAddSub_(a, b, c, d);
-    //PrintResult("Test 1", a, b, c, d, result);
 
     a = 101; b = 34; c = -190; d = 25;
     result = IntegerAddSub_(a, b, c, d);
-    //PrintResult("Test 2", a, b, c, d, result);
 }
 
 int main() {
-    //square();
+    checkMemory();
     bool normal_input = true;
     char cmd[256];
-    cout << "TurboQ - Blazingly Fast Quantum Computer Simulation Software." << endl;
+    QuantumState *qs = nullptr;
+
+    cout << "Quplexity - Blazingly Fast Quantum Computer Simulation Software." << endl;
     cout << "Type 'help' to list commands." << endl;
     while (normal_input) {
         cout << "$ ";
         if (fgets(cmd, sizeof(cmd), stdin) != nullptr) {
-            // Remove the trailing newline character
             cmd[strcspn(cmd, "\n")] = '\0';
 
             if (strcmp(cmd, "exit") == 0) {
@@ -60,21 +60,30 @@ int main() {
                 break;
             } else if (strstr(cmd, "Q") != nullptr) {
                 int num_of_qubits = extractNumber(cmd);
-                // Initialize Hadamard gate
-                int numQubits = num_of_qubits;
-                Complex *stateVector = initializeState(numQubits);
-                cout << "Initialized " << numQubits << " qubit(s) in the quantum circuit." << endl;
+                if (qs != nullptr) {
+                    delete[] qs->stateVector;
+                    delete qs;
+                }
+                qs = initializeState(num_of_qubits);
+                cout << "Initialized " << num_of_qubits << " qubit(s) in the quantum circuit." << endl;
+
                 bool prompt = true;
                 char cmd2[256];
                 while (prompt) {
                     cout << "[circuit]$ ";
                     if (fgets(cmd2, sizeof(cmd2), stdin) != nullptr) {
-                        // Remove the trailing newline character
                         cmd2[strcspn(cmd2, "\n")] = '\0';
                         if (strstr(cmd2, "H") != nullptr) {
                             int qubit_index = extractNumber(cmd2);
-                            cout << "Applied Hadamard gate to qubit of index {" << qubit_index << "}" << endl;
-                        } else if (strstr(cmd2, "exit") != nullptr) {
+                            Complex hadamard[2][2] = {
+                                {1.0 / sqrt(2), 1.0 / sqrt(2)},
+                                {1.0 / sqrt(2), -1.0 / sqrt(2)}
+                            };
+
+                            applySingleQubitGate(qs, hadamard, qubit_index);
+                            printQuantumState(qs);
+                            cout << "Applied Hadamard gate to qubit of index " << qubit_index << endl;
+                        } else if (strcmp(cmd2, "exit") == 0) {
                             cout << "Exiting QCVM Circuit" << endl;
                             break;
                         } else {
@@ -84,6 +93,10 @@ int main() {
                 }
             }
         }
+    }
+    if (qs != nullptr) {
+        delete[] qs->stateVector;
+        delete qs;
     }
     return 0;
 }
