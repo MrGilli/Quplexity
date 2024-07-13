@@ -10,7 +10,7 @@ Quplexity is a lightning-fast and extremely lightweight Quantum Circuit/Computer
 
 ### Dependencies
 
-Install the following to build/run TurboQ on your machine: 
+Install the following to build/run Quplexity on your machine: 
 * nasm (assembly compiler)
 * gcc & g++
 
