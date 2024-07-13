@@ -31,7 +31,10 @@ chmod +x run.sh
 ```
 
 ### Download without compiling:
-Go to ./Download then download the quplexity file, once downloaded run ./{quplexity file name you downloaded}
+Go to ./Download then download the quplexity file, once downloaded run 
+```
+./{quplexity file name you downloaded}
+```
 
 ## Authors
 
