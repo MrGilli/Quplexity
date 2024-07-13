@@ -3,16 +3,14 @@
 
 #include <complex>
 
-using Complex = std::complex<double>;
+typedef std::complex<double> Complex;
 
-struct QuantumState {
-    int numQubits;
-    Complex *stateVector;
-};
-
-QuantumState* initializeState(int numQubits);
-void applySingleQubitGate(QuantumState *qs, Complex gate[2][2], int targetQubit);
-void printQuantumState(QuantumState *qs);
-int measureQubit(Complex *stateVector, int numQubits, int targetQubit);
+extern "C" {
+    Complex* initializeState(int numQubits);
+    void applySingleQubitGate(Complex *stateVector, int numQubits, Complex gate[2][2], int targetQubit);
+    void printQuantumState(Complex *stateVector, int numQubits);
+    int measureQubit(Complex *stateVector, int numQubits, int targetQubit);
+    int calculate_dimension_(int numQubits);
+}
 
 #endif

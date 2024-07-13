@@ -1,60 +1,53 @@
 #include "quantum.h"
-#include <cstdlib> // For malloc and free
-#include <cmath>   // For pow and cabs
-#include <iostream>
+#include <cstdlib>
+#include <cmath>
+#include <cstdio>
 
 extern "C" int calculate_dimension_(int numQubits);
 
-// Initialize quantum state
-QuantumState* initializeState(int numQubits) {
-    QuantumState *qs = new QuantumState;
-    qs->numQubits = numQubits;
+Complex* initializeState(int numQubits) {
     int dimension = calculate_dimension_(numQubits);
-    qs->stateVector = new Complex[dimension];
+    Complex *stateVector = new Complex[dimension];
     for (int i = 0; i < dimension; i++) {
-        qs->stateVector[i] = Complex(0.0, 0.0);
+        stateVector[i] = Complex(0.0, 0.0);
     }
-    qs->stateVector[0] = Complex(1.0, 0.0); // Initialize to |0>
-    return qs;
+    stateVector[0] = Complex(1.0, 0.0); // Initialize to |0>
+    return stateVector;
 }
 
-// Apply a single qubit gate
-void applySingleQubitGate(QuantumState *qs, Complex gate[2][2], int targetQubit) {
-    int dimension = calculate_dimension_(qs->numQubits);
+void applySingleQubitGate(Complex *stateVector, int numQubits, Complex gate[2][2], int targetQubit) {
+    int dimension = calculate_dimension_(numQubits);
     Complex *newStateVector = new Complex[dimension];
-
     for (int i = 0; i < dimension; i++) {
         int bit = (i >> targetQubit) & 1;
         int base = i & (~(1 << targetQubit));
-        newStateVector[i] = gate[bit][0] * qs->stateVector[base] + gate[bit][1] * qs->stateVector[base | (1 << targetQubit)];
+        newStateVector[i] = gate[bit][0] * stateVector[base] + gate[bit][1] * stateVector[base | (1 << targetQubit)];
     }
-
     for (int i = 0; i < dimension; i++) {
-        qs->stateVector[i] = newStateVector[i];
+        stateVector[i] = newStateVector[i];
     }
-
     delete[] newStateVector;
 }
 
-// Print quantum state
-void printQuantumState(QuantumState *qs) {
-    int dimension = 1 << qs->numQubits;
+void printQuantumState(Complex *stateVector, int numQubits) {
+    int dimension = 1 << numQubits;
     for (int i = 0; i < dimension; i++) {
-        std::cout << "|" << i << "> = " << qs->stateVector[i].real() << " + " << qs->stateVector[i].imag() << "i\n";
+        printf("|%d> = %.2f + %.2fi\n", i, std::real(stateVector[i]), std::imag(stateVector[i]));
     }
 }
 
-// Measure a qubit
+void showstate() {
+
+}
+
 int measureQubit(Complex *stateVector, int numQubits, int targetQubit) {
     int dimension = calculate_dimension_(numQubits);
     double probability0 = 0.0;
-
     for (int i = 0; i < dimension; i++) {
         if (((i >> targetQubit) & 1) == 0) {
-            probability0 += std::pow(std::abs(stateVector[i]), 2);
+            probability0 += pow(abs(stateVector[i]), 2);
         }
     }
-
     double randomValue = static_cast<double>(rand()) / RAND_MAX;
     return (randomValue < probability0) ? 0 : 1;
 }

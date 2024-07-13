@@ -1,9 +1,8 @@
 section .text
-global IntegerAddSub_
-global quantum_square_
-global calculate_dimension_
-
-
+    global IntegerAddSub_
+    global quantum_square_
+    global calculate_dimension_
+   
 IntegerAddSub_:
     ; Calculate a + b + c - d
     mov eax, edi    ; eax = a
@@ -32,3 +31,5 @@ calculate_dimension_:
     mov ecx, edi    ; Load numQubits into ECX
     shl eax, cl     ; Perform the left shift (1 << numQubits)
     ret             ; return result to caller
+
+
