@@ -39,5 +39,5 @@ Go to ./Download then download the quplexity file, once downloaded run
 ## Authors
 
 Jacob Gill  
-contact: jacobygill@outlook.com
+contact: jacobygill@outlook.com 
 Feel free to chat with me on Discord: @mrgill0651
