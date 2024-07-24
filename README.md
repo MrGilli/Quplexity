@@ -1,15 +1,15 @@
 # Quplexity
 
-Quplexity is a blazingly fast and lightweight application that is used to simulate QC's and their logic.
-Quplexity is written in C++ and x86_64 Assembly for insanely fast execution times. 
+Quplexity is a blazingly fast and lightweight library that provides Quantum Computer (QC) simulators with their mathematical and essential logic. 
+Quplexity is written in "Assembly" aka "Assembler" for insanely fast execution/computation times. Quplexity has exstensive and carefully crafted documentation, to help anyone no matter what their technological fluency is, intergrate Quplexity into their project or contribute to the project itself. Documentation and Examples can be found in the folder (./Documentation).
 
 ## Description
-Quplexity is a lightning-fast and extremely lightweight Quantum Circuit/Computer simulator written in x86-64bit Assembly and C++. Quplexity will dramatically improve the quantum computing environment by delivering unmatched simulation speed and efficiency. Its capacity to simulate more qubits than previous Python-based software would enable researchers and developers to carry out larger and more complex quantum experiments. This improved simulation capacity has the potential to speed the development of quantum algorithms, resulting in faster progress in quantum computing research and real-world applications. Quplexity's efficiency can minimise computational resource requirements, making quantum simulation more accessible and affordable to academic institutions, startups, and established businesses alike.
+Quplexity is a Quantum Computer simulatior (QCS/QC) library written in Assembly that provides lightning-fast and extremely lightweight computational functionality to the projects that its used in. Because Quplexity is written in Assembly it has great hardware support and amazing low-level compatability capabilities that in return provides computational tasks in a "seemless" manner. Quplexity is currently in the process of being intergrated into Qrack (https://github.com/unitaryfund/qrack) to provide accelerated performance and better tailored hardware support. 
 
-## Do I need a fancy GPU to use Quplexity?
-Not at all, a CPU is all you need to get started in the Quantum world with Quplexity!
+## Do I need to know Assembly to use Quplexity?
+Not at all, Quplexity is designed to make it easy and convinient to get started with. Quplexity has exstensive and carefully crafted documentation, to help anyone no matter what their technological fluency is, intergrate Quplexity into their project or contribute to the project itself. Documentation and Examples can be found in the folder (./Documentation).
 
-## Getting Started
+## Getting Started!
 
 ### Dependencies
 
@@ -17,27 +17,23 @@ Install the following to build/run Quplexity on your machine:
 * nasm (assembly compiler)
 * gcc & g++
 
-### Executing program
+### Compiling and Linking!
 
-* How to run the program
+After you installed the dependencies and ensured everything is working your ready to start using Quplexity:
+###### Compiling:
+```bash
+nasm -f elf64 assembly_file.asm -o assembly_object_file.o
 ```
-bash run.sh
+###### Then link with your C/C++ file:
+```bash
+gcc -no-pie cpp_file.asm assembly_object_file.o -o test
 ```
-or
+###### To run the example above:
+```bash
+./test
+```
 
-```
-chmod +x run.sh
-```
-
-```
-./run.sh
-```
-
-### Download without compiling:
-Go to ./Download then download the quplexity file, once downloaded run 
-```
-./{quplexity file name you downloaded}
-```
+#### For Extensive and indepth documentation please see the *.pdf files found in the folder/directory (./Documentation)
 
 ## Authors
 
