@@ -41,4 +41,4 @@ Jacob Gill
 
 contact: jacobygill@outlook.com 
 
-Feel free to chat with me on Discord: @mrgill0651
+Discord: @mrgill0651
