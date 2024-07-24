@@ -38,5 +38,7 @@ gcc -no-pie cpp_file.asm assembly_object_file.o -o test
 ## Authors
 
 Jacob Gill  
+
 contact: jacobygill@outlook.com 
+
 Feel free to chat with me on Discord: @mrgill0651
