@@ -1,4 +1,5 @@
-; © Jacob Liam Gill, and the Quplexity team 2024.
+; © Jacob Liam Gill, and the Quplexity team 2024. DO NOT REMOVE THIS LINE.
+; Quplexity MUST be credited in the project you use it in. DO NOT REMOVE THIS LINE.
 
 section .data
     one dd 1.0
@@ -23,12 +24,12 @@ sqrt_exponential_log_asm:
     ; Arguments:
     ; xmm0: Input float number
 
-    ; Compute log(x)
+                            ; Compute log(x)
     call log                ; Call the log function
-    ; Compute exp(log(x)) which is just x
+                            ; Compute exp(log(x)) which is just x
     call exp                ; Call the exp function
-    ; Compute sqrt(exp(log(x)))
-    sqrtss xmm0, xmm0      ; Compute the square root
+                            ; Compute sqrt(exp(log(x)))
+    sqrtss xmm0, xmm0       ; Compute the square root
     ret
 
 sqrt_array_asm:
@@ -73,7 +74,7 @@ fast_inverse_sqrt:
     ; Arguments:
     ; xmm0: Input float number
 
-    ; Load constant 1.0 into xmm1
+                                  ; Load constant 1.0 into xmm1
     movss   xmm1, [one]           ; Load constant 1.0 into xmm1
     sqrtss  xmm0, xmm0            ; Compute square root of the input number
     divss   xmm1, xmm0            ; Divide 1.0 by the square root (inverse sqrt)
@@ -102,7 +103,7 @@ gills_matrix1x2:
     ;mov qword [rdi], rax     ; First element
     ;mov qword [rdi + 8], rcx ; Second element
 
-    ret             ; return to caller2
+    ret                        ; return to caller2
 
 matrix2x2:
     ; Arguments:
@@ -153,8 +154,6 @@ matrix2x2:
     ret
 
 gills_inv_matrix2x2:
-    ; A^-1 = 1/det(A) |x x|
-    ;                 |y y|
 
     movss xmm1, dword [rdi]     ; xmm1 = num1
     movss xmm2, dword [rsi]     ; xmm2 = num2
@@ -171,6 +170,12 @@ gills_inv_matrix2x2:
     mulss xmm2, xmm3            ; xmm2 = dc
 
     subss xmm1, xmm2            ; xmm1 = ad - dc
+    pxor xmm8, xmm8             ; load zero into xmm8
+    ucomiss xmm1, xmm8          ; compare the resultant of ad - dc with zero
+
+    jp determinant_error        ; if ad - dc = 0 there is no inverse of the matrix
+
+    ;ELSE CONTINUE 
 
     movss xmm5, [one]           ; xmm5 = 1.0
     movss xmm6, [mA]            ; get the [mA] value ready for use
@@ -195,8 +200,11 @@ gills_inv_matrix2x2:
     movss dword [r8 + 12], xmm4 ; Store xmm4 in inv_matrix_C[3]
 
           
-    ret                         ; return inverse matrix to caller
+    ret
+
+determinant_error:
+    mov rax, 0
+    ret
 
 return_0:
-    mov rax, 0
     ret
