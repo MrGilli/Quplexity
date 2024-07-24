@@ -6,5 +6,7 @@ To get started with Quplexity-Intel please take the time to look at the carefull
 
 ## To Contribute:
 Please don't hesitate to contact me if you wish to contribute/improve Quplexity, as well as if you have any cool ideas or questions:
-contact: jacobygill@outlook.com 
+
+Email: jacobygill@outlook.com 
+
 Discord: @mrgill0651
