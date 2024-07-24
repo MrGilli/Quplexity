@@ -1,4 +1,4 @@
-; © Jacob Liam Gill, and the developers of Qrack 2017 - 2024.
+; © Jacob Liam Gill, and the Quplexity team 2024.
 
 section .data
     one dd 1.0
