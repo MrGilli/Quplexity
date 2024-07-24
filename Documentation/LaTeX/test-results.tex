@@ -1,0 +1,82 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+
+\title{Quplexity-Intel Assembly Tests}
+\author{By Jacob Liam Gill}
+\date{Jul 2024}
+
+\begin{document}
+\maketitle
+
+\subsection*{Summing Elements In An Array:}
+The Qrack project can find substantial benefit in using x86 Assembly for summing elements in an array: 
+When comparing the time it taks C++ and Assembly to do this operation I noticed Assembly was around 5.20 times faster than C++. \\
+
+\noindent
+\fbox{%
+  \parbox{\dimexpr\textwidth-2\fboxsep}{%
+    \textbf{Assembly:} Sum: 1784293664, Time taken: 587 ms. \\
+    \textbf{C++:} Sum: 1784293664, Time taken: 3055 ms.
+  }%
+}
+
+\subsection*{Sum Of Square Roots:}
+The second function that I found to have significant performace benefits when being written in Assembly rather than C++ was: The Sum of Square Roots. \\
+
+
+\noindent
+\fbox{%
+  \parbox{\dimexpr\textwidth-2\fboxsep}{%
+    \textbf{C++} time: 10.1214 ms \\
+    \textbf{Assembly} time: 0.953463 ms \\
+    Sum of square roots (C++): 6.66969e+08 \\
+    Sum of square roots (Assembly): 6.66969e+08 \\
+  }%
+}
+
+\subsection*{Inverse Square Root:}
+A basic inverse square root wtitten in Assembly provides a small amount of performance benefits: \\ \\
+\noindent
+\fbox{%
+  \parbox{\dimexpr\textwidth-2\fboxsep}{%
+    \textbf Inverse square root (C++): 0.22201 \\
+            C++ floating square root time: 3e-05 ms \\ \\
+            Inverse square root (Assembly): 0.22201 \\
+            Assembly floating square root time: 2.9e-05 ms \\
+  }%
+} \\\\\\\\
+
+\subsection*{Multiplying two, 2x2 Matrix:}
+This is the performace difference fo multiplying two 2x2 Matrix:
+The program is multiplying Matrix A with Matrix B and producing an output: \\
+
+Matrix \( A \):
+\[
+A = \begin{bmatrix}
+a_{11} & a_{12} \\
+a_{21} & a_{22}
+\end{bmatrix}
+\]
+
+Matrix \( B \):
+\[
+B = \begin{bmatrix}
+b_{11} & b_{12} \\
+b_{21} & b_{22}
+\end{bmatrix}
+\]
+
+Results:
+\noindent
+\fbox{%
+  \parbox{\dimexpr\textwidth-2\fboxsep}{%
+    \textbf C++ Result: 19 22 43 50 \\
+            Assembly Result: 19 22 43 50 \\
+            C++ Duration: 0.531 ms \\
+            Assembly Duration: 0.108 ms \\
+  }%
+} \\
+
+
+\end{document}
