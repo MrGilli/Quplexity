@@ -1,5 +1,5 @@
-; © Jacob Liam Gill, and the Quplexity team 2024. DO NOT REMOVE THIS LINE.
-; Quplexity MUST be credited in the project you use it in. DO NOT REMOVE THIS LINE.
+; © Jacob Liam Gill, and the Quplexity team 2024. **DO NOT REMOVE THIS LINE.**
+; Quplexity MUST be credited in the project you use it in. **DO NOT REMOVE THIS LINE.**
 
 section .data
     one dd 1.0
@@ -24,12 +24,12 @@ sqrt_exponential_log_asm:
     ; Arguments:
     ; xmm0: Input float number
 
-                            ; Compute log(x)
+    ; Compute log(x)
     call log                ; Call the log function
-                            ; Compute exp(log(x)) which is just x
+    ; Compute exp(log(x)) which is just x
     call exp                ; Call the exp function
-                            ; Compute sqrt(exp(log(x)))
-    sqrtss xmm0, xmm0       ; Compute the square root
+    ; Compute sqrt(exp(log(x)))
+    sqrtss xmm0, xmm0      ; Compute the square root
     ret
 
 sqrt_array_asm:
@@ -41,7 +41,7 @@ sqrt_array_asm:
     ; Initialize pointers
     mov     rcx, rdx         ; rcx = number of elements
     cmp     rcx, 0           ; Check if number of elements is zero
-    je      done             ; If zero, we're done
+    je      done            ; If zero, we're done
 
 .loop:
     ; Load 4 floats from input array into xmm0
@@ -74,7 +74,7 @@ fast_inverse_sqrt:
     ; Arguments:
     ; xmm0: Input float number
 
-                                  ; Load constant 1.0 into xmm1
+    ; Load constant 1.0 into xmm1
     movss   xmm1, [one]           ; Load constant 1.0 into xmm1
     sqrtss  xmm0, xmm0            ; Compute square root of the input number
     divss   xmm1, xmm0            ; Divide 1.0 by the square root (inverse sqrt)
@@ -88,22 +88,24 @@ gills_matrix1x2:
 
     ; Load values
     ; Load integers into registers
-    mov rax, rdi    ; Load num1 into rax
-    mov rbx, rsi    ; Load num2 into rbx
-    mov rdx, rdx    ; Load num3 into rdx
-    mov rsi, rcx    ; Load num4 into rsi
+    movss xmm1, dword [rdi]     ; xmm1 = num1
+    movss xmm2, dword [rsi]     ; xmm2 = num2
+    movss xmm3, dword [rdx]     ; xmm3 = num3
+    movss xmm4, dword [rcx]     ; xmm4 = num4
 
     ; Perform matrix multiplication
-    imul rax, rdx   ; rax = num1 * num3
-    imul rbx, rsi   ; rcx = num2 * num4
+    mulss xmm1, xmm3            ; rax = num1 * num3
+    mulss xmm2, xmm4            ; rcx = num2 * num4
 
-    add rax, rbx    ; rax = rax + rbx
+    addss xmm1, xmm2            ; rax = rax + rbx
+
+    movss xmm0, xmm1            ; move answer into xmm0 for output.
 
     ; Store the result in the output matrix
-    ;mov qword [rdi], rax     ; First element
-    ;mov qword [rdi + 8], rcx ; Second element
+    ;mov qword [rdi], rax       ; First element
+    ;mov qword [rdi + 8], rcx   ; Second element
 
-    ret                        ; return to caller2
+    ret                         ; return to caller
 
 matrix2x2:
     ; Arguments:
