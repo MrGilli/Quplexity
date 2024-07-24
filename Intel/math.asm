@@ -40,7 +40,7 @@ sqrt_array_asm:
     ; Initialize pointers
     mov     rcx, rdx         ; rcx = number of elements
     cmp     rcx, 0           ; Check if number of elements is zero
-    je      done            ; If zero, we're done
+    je      done             ; If zero, we're done
 
 .loop:
     ; Load 4 floats from input array into xmm0
@@ -177,7 +177,7 @@ gills_inv_matrix2x2:
     movss xmm7, [mB]            ; get the [mB] value ready for use
 
     divss xmm5, xmm1            ; xmm5 = 1/det(A)
-                                ; xmm5 now holds teh value of det(A)
+                                ; xmm5 now holds the value of det(A)
 
     ; Compute the inverse matrix elements
     movss xmm6, [mA]            ; Load mA value into xmm6
