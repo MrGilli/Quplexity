@@ -10,7 +10,6 @@ section .data
 section .text
     global sqrt_array_asm
     global floatingpoint_sqrt
-    global fast_inverse_sqrt
     extern exp
     extern log
     extern sqrt
@@ -68,17 +67,6 @@ floatingpoint_sqrt:
     ; Compute the square root
     sqrtss xmm0, xmm0
     ; Return the result in xmm0
-    ret
-
-fast_inverse_sqrt:
-    ; Arguments:
-    ; xmm0: Input float number
-
-    ; Load constant 1.0 into xmm1
-    movss   xmm1, [one]           ; Load constant 1.0 into xmm1
-    sqrtss  xmm0, xmm0            ; Compute square root of the input number
-    divss   xmm1, xmm0            ; Divide 1.0 by the square root (inverse sqrt)
-    movss   xmm0, xmm1            ; Return the result in xmm0
     ret
 
 gills_matrix1x2:
