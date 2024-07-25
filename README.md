@@ -11,7 +11,8 @@ Not at all, Quplexity is designed to make it easy and convinient to get started 
 ### Dependencies
 
 Install the following to build/run Quplexity on your machine: 
-* nasm (assembly compiler)
+* nasm (for intel ASM)
+* as   (for ARM/ARM64 ASM)
 * gcc & g++
 
 ### Compiling and Linking!
