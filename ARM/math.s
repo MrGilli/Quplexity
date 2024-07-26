@@ -8,6 +8,7 @@
 
 .global _gills_inv_matrix2x2
 .global _gills_matrix2x2
+.global _gills_matrix2x1
 .align 3
 
 _gills_inv_matrix2x2:
@@ -90,4 +91,18 @@ _gills_matrix2x2:
     STR D10, [X2, #16]
     STR D11, [X2, #24]
 
+    RET
+
+_gills_matrix2x1:
+    ; LOAD MATRIX VALUES (DOUBLE)
+    LDR  D0, [X0, #0]   ; A1
+    LDR  D1, [X1, #0]   ; A2
+    LDR  D2, [X0, #8]   ; B1
+    LDR  D3, [X1, #8]   ; B2
+
+    FMUL D0, D0, D1
+    FMUL D2, D2, D3
+    FADD D0, D0, D2
+
+    STR  D0, [X2]
     RET
