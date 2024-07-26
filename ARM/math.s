@@ -50,11 +50,6 @@ _gills_inv_matrix2x2:
 
 _determinant_zero:
     // Set out_matrix to zero if determinant is zero
-    FMOV D8, #0.0
-    STR  D8, [X4, #0]
-    STR  D8, [X4, #8]
-    STR  D8, [X4, #16]
-    STR  D8, [X4, #24]
 
     RET
 
