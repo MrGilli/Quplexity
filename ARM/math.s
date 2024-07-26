@@ -31,18 +31,18 @@ _gills_inv_matrix2x2:
     FDIV D7, D12, D6 ; D7 = 1 / determinant
 
     ; Calculate inverse matrix elements
-    FMUL D8,  D3, D7  ; D8 = num4 / determinant
-    FMUL D9,  D1, D7  ; D9 = -num2 / determinant
-    FMUL D10, D2, D7 ; D10 = -num3 / determinant
-    FMUL D11, D0, D7 ; D11 = num1 / determinant
+    FMUL D8,  D3, D7    ; D8 = num4 / determinant
+    FMUL D9,  D1, D7    ; D9 = -num2 / determinant
+    FMUL D10, D2, D7    ; D10 = -num3 / determinant
+    FMUL D11, D0, D7    ; D11 = num1 / determinant
 
     ; Store results in out_matrix
-    STR  D8,  [X4, #0]   ; out_matrix[0] = D8
-    FNEG D9,  D9         ; D9 is now negative
-    STR  D9,  [X4, #8]   ; out_matrix[1] = D9
+    STR  D8,  [X4, #0]  ; out_matrix[0] = D8
+    FNEG D9,  D9        ; D9 is now negative
+    STR  D9,  [X4, #8]  ; out_matrix[1] = D9
     FNEG D10, D10       ; D10 is now negative
-    STR  D10, [X4, #16]  ; out_matrix[2] = D10
-    STR  D11, [X4, #24]  ; out_matrix[3] = D11
+    STR  D10, [X4, #16] ; out_matrix[2] = D10
+    STR  D11, [X4, #24] ; out_matrix[3] = D11
 
     RET
 
@@ -73,9 +73,9 @@ _gills_matrix2x2:
     FMUL D9, D1, D6         ; b1c2
     FADD D8, D8, D9         ; a1a2 + b1c2
 
-    FMUL D9,  D0, D5         ; a1b2
-    FMUL D10, D1, D7         ; b1d2
-    FADD D9,  D9, D10        ; a1b2 + b1d2
+    FMUL D9,  D0, D5        ; a1b2
+    FMUL D10, D1, D7        ; b1d2
+    FADD D9,  D9, D10       ; a1b2 + b1d2
 
     FMUL D10, D2, D4        ; c1a2
     FMUL D11, D3, D6        ; d1c2
