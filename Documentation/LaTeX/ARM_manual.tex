@@ -1,0 +1,151 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{geometry}
+
+\geometry{margin=1in}
+
+\title{Quplexity-ARM and ARM64 Assembly \\ Manual/User Guide}
+\author{Jacob Liam Gill}
+\date{Saturday 27 July 2024}
+
+\begin{document}
+\maketitle
+
+\subsection*{What is Quplexity?}
+You might be wondering what Quplexity is and in what ways your project can benefit from using it. \\
+Quplexity is an exceptionally fast and extremely lightweight modular library for providing Quantum Computer simulators with their complex and precise mathematical logic and other essential functions that these projects need.
+Quplexity is written in the "Assembly" or "Assembler" language, which is one of the contributing factors to its impressive speeds, extensive hardware support and extremely lightweight nature. \\
+
+\noindent Quplexity-ARM is verified to work on \texttt{MacBooks} with \texttt{M2 or M1} chips as well as \texttt{Raspberry Pi's(3, 4, 5 [64bit!])}, thats right even a Raspberry Pi can run Quplexity with ease.
+
+\subsection*{Navigating the Quplexity Project}
+The Quplexity codebase is split up into two main parts: the code/tools for Intel CPUs found in the \texttt{./Intel} directory and the code/tools for ARM CPUs found in the \texttt{./ARM} directory. It is important to note that Quplexity is compiled with the assembler \texttt{NASM (x86 Intel)} or \texttt{as (ARM and ARM64)}.
+
+\subsection*{Using Quplexity in Your Project}
+Before you can use the magic that Quplexity offers, you must set up your project correctly to use Quplexity tools/functions. You must compile your C/C++ file with the Quplexity object file linked. For ARM and ARM64, you can do this as follows: \\
+
+\begin{lstlisting}[language=bash, frame=single]
+# Compile Assembly (for ARM) file:
+as math.s -o math.o
+
+# Link:
+g++ -no-pie a.cpp math.o -o test
+\end{lstlisting}
+
+\newpage
+
+\subsection*{Matrix2x2 Example.}
+Math behind the \texttt{\_gills\_matrix2x2} function:
+\[
+\begin{bmatrix}
+  a_{A} & a_{B} \\
+  a_{C} & a_{D}
+\end{bmatrix}
+\times
+\begin{bmatrix}
+  b_{A} & b_{B} \\
+  b_{C} & b_{D}
+\end{bmatrix}
+\] \\
+\noindent After successfully compiling and linking a Quplexity file with a C++ file, you can now begin to use Quplexity functions/logic in that C++ file. In your C++ file, you will need to declare the Assembly functions as external: \\
+
+\begin{lstlisting}[language=C++, frame=single]
+extern "C" {
+  void _gills_matrix2x2(double matrixA[2][2], double matrixB[2][2], 
+                        double matrixC[2][2]);
+}
+\end{lstlisting}
+
+\noindent \\Then you can call that Assembly function from within your C++ code. \\
+An example (Matrix2x2) can be found below: \\
+\begin{lstlisting}[language=C++, frame=single]
+  //Define the Matrix's for this example.
+  double matrixA[2][2] = {{8.0, 5.0}, {2.0, 3.0}};
+  double matrixB[2][2] = {{19.0, 1.0}, {0.1, 4.0}};
+  double matrixC[2][2] = {{0.0, 0.0}, {0.0, 0.0}};
+
+  std::cout << "MUL two 2x2 Matrix:" << std::endl;
+  
+  _gills_matrix2x2(matrixA, matrixB, matrixC); //Call ARM Assembly function.
+
+  std::cout << matrixC[0][0] << " " << matrixC[0][1] << std::endl;
+  std::cout << matrixC[1][0] << " " << matrixC[1][1] << "\n\n";
+\end{lstlisting}
+
+\subsection*{Inverse of a 2x2 Matrix Example:}
+This is an example of how to use the Quplexity function "\_gills\_inv\_matrix2x2". 
+Note that you should only pass floats into this function, instead of passing int num1 = 1; pass float num1 = 1.0;
+
+\begin{lstlisting}[language=C++, frame=single]
+  extern "C" {
+    void _gills_inv_matrix2x2(double* num1, double* num2, double* num3, 
+                              double* num4, double* out_matrix);
+  }
+\end{lstlisting}
+
+
+\begin{lstlisting}[language=C++, frame=single]
+  //Make sure the external function is declared.
+  double num1 = 1.0;
+  double num2 = 2.0;
+  double num3 = 3.0;
+  double num4 = 4.0;
+  double out_matrix[4] = {0.0, 0.0, 0.0, 0.0};
+
+  _gills_inv_matrix2x2(&num1, &num2, &num3, &num4, out_matrix);
+
+  std::cout << "Inverted matrix:" << std::endl;
+  std::cout << out_matrix[0] << " " << out_matrix[1] << std::endl;
+  std::cout << out_matrix[2] << " " << out_matrix[3] << "\n\n";
+
+\end{lstlisting}
+
+\noindent \\ The determinant or "det(A)" is found by: $det(A) = ad - bc$, if $ad - bc = 0$, mathematically there is no inverse of the matrix 'A'. \\
+The output for the above will be: $-2 1 1.5 -0.5$ \\
+
+\subsection*{Multiplication of two 2x1 Matrix.}
+This is an example of how to use the Quplexity function "\_gills\_matrix2x1". \\
+The mathematics behind this function and my example can be viewed below: \\
+
+\[
+\begin{bmatrix}
+0 \\
+1
+\end{bmatrix}
+\times
+\begin{bmatrix}
+1 \\
+0
+\end{bmatrix}
+= [0]
+\]
+
+\noindent This function is great for math involving Qubits at very fast speeds and with very little overhead. \\
+Note that you should only pass floats into this function, instead of passing int num1 = 1; pass float num1 = 1.0;  \\\\
+An example using "\_gills\_matrix2x1" is as follows: \\
+
+\begin{lstlisting}[language=C++, frame=single]
+extern "C" {
+  void _gills_matrix2x1(double matrixA[2], double matrixB[2], 
+                        double matrixC[1]);
+}
+\end{lstlisting}
+
+\begin{lstlisting}[language=C++, frame=single]
+  //Make sure the external function is declared.
+
+  std::array<double, 2> A = {1.0, 0.0};
+  std::array<double, 2> B = {10.0, 299.0};
+  std::array<double, 1> C = {0.0};
+
+  std::cout << "MUL two 2x1 Matrix:" << std::endl;
+  _gills_matrix2x1(A.data(), B.data(), C.data());
+  std::cout << "[" << C[0] << "]" << "\n\n";
+\end{lstlisting}
+
+\noindent The output for the above will be: $0$ \\
+
+
+\end{document}
