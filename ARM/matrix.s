@@ -9,8 +9,6 @@
 .global _gills_inv_matrix2x2
 .global _gills_matrix2x2
 .global _gills_matrix2x1
-.global _gills_hadamard2x1
-.global _gills_hadamard2x2
 .align 3
 
 _gills_inv_matrix2x2:
@@ -103,50 +101,3 @@ _gills_matrix2x1:
 
     STR  D0, [X2]
     RET
-
-_gills_hadamard2x1:
-    // Apply the famous Hadamard gate [H] to a qubit/2x1 matrix.
-    // LOAD 2x1 MATRIX VALUES (DOUBLE)
-    LDR D1, [X0]    // matrixA[0][0]
-    LDR D2, [X0, #8]    // matrixA[0][1]
-
-    // [H] = 1/sqrt(2)
-    FMOV  D3, #1.0
-    FMOV  D4, #2.0
-    FSQRT D5, D4
-    FDIV  D0, D3, D5    // D0 now equals 1/sqrt(2)
-
-    // Multiply each item in the 2x1 Matrix by D0
-    FMUL D1, D0, D1
-    FMUL D2, D0, D2
-    
-    STR D1, [X1, #0]
-    STR D2, [X1, #8]
-
-    RET
-    
-_gills_hadamard2x2:
-    LDR D1, [X0]
-    LDR D2, [X0, #8]
-    LDR D3, [X0, #16]
-    LDR D4, [X0, #24]
-
-    // [H] = 1/sqrt(2)
-    FMOV D5, #1.0
-    FMOV D6, #2.0
-    FSQRT D7, D6
-    FDIV D0, D5, D7
-
-    // Multiply each element of the 2x2 matrix by D0
-    FMUL D1, D1, D0
-    FMUL D2, D2, D0
-    FMUL D3, D3, D0
-    FMUL D4, D4, D0
-
-    STR D1, [X1, #0]
-    STR D2, [X1, #8]
-    STR D3, [X1, #16]
-    STR D4, [X1, #24]
-
-    // Return output 2x2 Matrix to caller.
-    RET 
