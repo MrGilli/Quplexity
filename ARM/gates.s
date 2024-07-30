@@ -7,7 +7,7 @@
 
 .global _pauli_X
 .global _pauli_Z
-//.global _gills_hadamard2x1 TO DO
+.global _gills_hadamard2x1
 .global _gills_hadamard2x2
 .align 3
 neg_one: .float -1.0
@@ -28,21 +28,22 @@ _pauli_X:
 
     //Apply pauli_X given a state vector full of types: doubles/floats
     //∣ψ′⟩=X∣ψ⟩=(01​10​)(αβ​)=(βα​)
-    //(0⋅α+1⋅β 1⋅α+0⋅β​)=(βα​)
+    //(0⋅α + 1⋅β 
+    //1⋅α + 0⋅β​)=(βα​)
 
     //ROW 1
-    FMUL D7, D1, D5
-    FMUL D8, D2, D6
-    FADD D9, D5, D6
+    FMUL D7, D1, D5     //D7 = 0 * a
+    FMUL D8, D2, D6     //D8 = 1 * b
+    FADD D9, D7, D8     //D9 = D7 + D8
     //ROW 2
-    FMUL D10, D1, D5
-    FMUL D11, D2, D6
-    FADD D11, D11, D10
+    FMUL D10, D2, D5    //D10 = 1 * a
+    FMUL D11, D1, D6    //D11 = 0 * b
+    FADD D12, D11, D10  //D12 = D11 + D10
 
     //Output the new state of the qubit after 
     //the Pauli-X gate has been applied
-    STR D9, [X1, #0]
-    STR D11, [X1, #8]
+    STR D9, [X1, #0]    //D9 = Output matrix [0]
+    STR D12, [X1, #8]   //D12 = Output matrix [1]
 
     RET                 //Return to caller
 
