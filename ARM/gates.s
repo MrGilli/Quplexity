@@ -47,6 +47,26 @@ _pauli_X:
 
     RET                 //Return to caller
 
+//_pauli_Y not done yet!!
+//_pauli_Y:
+    // Y = (0 -i ​i 0​)
+    // Define pauli_Y gate
+    //FMOV D1, #0.0
+    //FMOV D2, #1.0
+
+    //LDR D3, [X0, #0]    // = a
+    //LDR D4, [X0, #8]    // = b
+
+    // (0⋅α + -i⋅β 
+    //  (i)⋅α + 0⋅β​)=(α−β​)
+    // ROW 1
+    //FMUL D5, D1, D2
+    //FMUL D6, D2, D4
+    //FADD D7, D5, D6
+    //VCMPE.D64 D7, D1      // Compare double-precision floating-point values in D7 and D1
+    //VMRS APSR_nzcv, FPSCR // Move the result of the comparison to APSR (Application Program Status Register)
+
+
 _pauli_Z:
     //Define pauli_X gate:
     // [1.0,  0.0]
