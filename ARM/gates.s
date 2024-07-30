@@ -7,7 +7,7 @@
 
 .global _pauli_X
 .global _pauli_Z
-.global _gills_hadamard2x1
+//.global _gills_hadamard2x1 TO DO
 .global _gills_hadamard2x2
 .align 3
 neg_one: .float -1.0
