@@ -7,7 +7,7 @@
 
 .global _pauli_X
 .global _pauli_Z
-.global _gills_hadamard2x1
+.global _identity_matrix2x2
 .global _gills_hadamard2x2
 .align 3
 neg_one: .float -1.0
@@ -97,6 +97,47 @@ _pauli_Z:
     STR D12, [X1, #8] // 0
 
     RET                 // Return to caller.
+
+_identity_matrix2x2:
+    // I=(1 0 ​0 1​)
+    //(a×1 + b×0, ​a×0 + b×1)
+    //(c×1 + d×0, c×0 + d×1​)
+    FMOV D1, #0.0
+    FMOV D2, #1.0
+    
+    //Load Matrix(A) values
+    LDR D3, [X0]
+    LDR D4, [X0, #8]
+    LDR D5, [X0, #16]
+    LDR D6, [X0, #24]
+
+    //ROW 1
+    //(a×1 + b×0, ​a×0 + b×1)
+    FMUL D7, D2, D3
+    FMUL D8, D1, D4
+    FADD D9, D8, D7
+    
+    FMUL D10, D3, D1
+    FMUL D11, D4, D2
+    FADD D12, D11, D10
+
+    //ROW 2
+    //(c×1 + d×0, c×0 + d×1​)
+    FMUL D13, D5, D2
+    FMUL D14, D6, D1
+    FADD D15, D14, D13
+
+    FMUL D16, D5, D1
+    FMUL D17, D6, D2
+    FADD D18, D17, D16
+
+    STR D9,  [X1, #0]
+    STR D12, [X1, #8]
+    STR D15, [X1, #16]
+    STR D18, [X1, #24]
+
+    RET
+
     
 _gills_hadamard2x2:
     LDR D1, [X0]
