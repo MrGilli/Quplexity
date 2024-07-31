@@ -1,0 +1,148 @@
+/* ARM/ARM64 TESTS:
+
+#include <iostream>
+#include <vector>
+#include <array>
+#include <chrono>
+
+extern "C" {
+    void gills_inv_matrix2x2(double* num1, double* num2, double* num3, double* num4, double* out_matrix);
+    void gills_matrix2x2(double matrixA[2][2], double matrixB[2][2], double matrixC[2][2]);
+    void gills_matrix2x1(double matrixA[2], double matrixB[2], double matrixC[1]);
+    //void gills_hadamard2x1(double target_matrix2x1[2], double output[2]);
+    void pauli_X(double A[2], double B[2]);
+    void pauli_Z(double A[2], double B[2]);
+    void identity_matrix2x2(double matrixA[2][2], double matrixB[2][2]);
+}
+
+int main() {
+    std::array<double, 2> A = {1.0, 0.0};
+    std::array<double, 2> B = {0.0, 1.0};
+    std::array<double, 1> C = {0.0};
+    std::array<double, 2> Cx2x1 = {0.0, 0.0};
+    double matrixA[2][2] = {{8.0, 5.0}, {2.0, 3.0}};
+    double matrixB[2][2] = {{19.0, 1.0}, {0.1, 4.0}};
+    double matrixC[2][2] = {{0.0, 0.0}, {0.0, 0.0}};
+    double num1 = 1.0;
+    double num2 = 2.0;
+    double num3 = 3.0;
+    double num4 = 4.0;
+    double out_matrix[4] = {0.0, 0.0, 0.0, 0.0};
+
+    std::cout << "Inverse of a 2x2 matrix:" << std::endl;
+    auto start_asm1 = std::chrono::high_resolution_clock::now();
+    gills_inv_matrix2x2(&num1, &num2, &num3, &num4, out_matrix);
+    auto end_asm1 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::micro> duration_asm1 = end_asm1 - start_asm1;
+
+    std::cout << "Assembly Duration: " << duration_asm1.count() << " microseconds\n";
+
+    std::cout << "Inverted matrix:" << std::endl;
+    std::cout << out_matrix[0] << " " << out_matrix[1] << std::endl;
+    std::cout << out_matrix[2] << " " << out_matrix[3] << "\n\n";
+
+    std::cout << "Mul two 2x2 matrix's:" << std::endl;
+    auto start_asm2 = std::chrono::high_resolution_clock::now();
+    gills_matrix2x2(matrixA, matrixB, matrixC);
+    auto end_asm2 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::micro> duration_asm2 = end_asm2 - start_asm2;
+    std::cout << "Assembly Duration: " << duration_asm2.count() << " microseconds\n";
+
+    std::cout << "Resultant Matrix:" << std::endl;
+    std::cout << matrixC[0][0] << " " << matrixC[0][1] << std::endl;
+    std::cout << matrixC[1][0] << " " << matrixC[1][1] << "\n\n";
+
+    std::cout << "MUL two 2x1 Matrix:" << std::endl;
+    auto start_asm3 = std::chrono::high_resolution_clock::now();
+    gills_matrix2x1(A.data(), B.data(), C.data());
+    auto end_asm3 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::micro> duration_asm3 = end_asm3 - start_asm3;
+    std::cout << "Assembly Duration: " << duration_asm3.count() << " microseconds\n";
+    std::cout << "Resultant:" << std::endl;
+    std::cout << "[" << C[0] << "]" << "\n\n";
+
+    std::cout << "Pauli_X Gate:" << std::endl;
+    auto start_asm4 = std::chrono::high_resolution_clock::now();
+    pauli_X(A.data(), C.data());
+    auto end_asm4 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::micro> duration_asm4 = end_asm4 - start_asm4;
+    std::cout << "Assembly Duration: " << duration_asm4.count() << " microseconds\n";
+    std::cout << "Resultant Vector:" << std::endl;
+    std::cout << "[" << C[0] << "]" << "\n" << "[" << C[1] << "]" << "\n\n";
+
+    std::cout << "Pauli_Z Gate:" << std::endl;
+    auto start_asm5 = std::chrono::high_resolution_clock::now();
+    pauli_Z(A.data(), C.data());
+    auto end_asm5 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::micro> duration_asm5 = end_asm5 - start_asm5;
+    std::cout << "Assembly Duration: " << duration_asm5.count() << " microseconds\n";
+    std::cout << "Resultant Vector:" << std::endl;
+    std::cout << "[" << C[0] << "]" << "\n" << "[" << C[1] << "]" << "\n\n";
+
+    std::cout << "Identity Gate:" << std::endl;
+    auto start_asm6 = std::chrono::high_resolution_clock::now();
+    identity_matrix2x2(matrixA, matrixB);
+    auto end_asm6 = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::micro> duration_asm6 = end_asm6 - start_asm6;
+    std::cout << "Assembly Duration: " << duration_asm6.count() << " microseconds\n";
+    std::cout << "Resultant Matrix:" << std::endl;
+    std::cout << matrixB[0][0] << " " << matrixB[0][1] << std::endl;
+    std::cout << matrixB[1][0] << " " << matrixB[1][1] << "\n\n";
+    return 0;
+} */
+
+
+
+
+/* INTEL x86-64 TESTS:
+
+
+
+#include <iostream>
+#include <vector>
+#include <chrono>
+
+extern "C" {
+    void matrix2x2(int64_t* A, int64_t* B, int64_t* C);
+}
+
+void matrix2x2_cpp(const std::vector<int64_t>& A, const std::vector<int64_t>& B, std::vector<int64_t>& C) {
+    C[0] = A[0] * B[0] + A[1] * B[2];
+    C[1] = A[0] * B[1] + A[1] * B[3];
+    C[2] = A[2] * B[0] + A[3] * B[2];
+    C[3] = A[2] * B[1] + A[3] * B[3];
+}
+
+int main() {
+    std::vector<int64_t> A = {1, 2, 3, 4};
+    std::vector<int64_t> B = {5, 6, 7, 8};
+    std::vector<int64_t> C_cpp(4, 0);
+    std::vector<int64_t> C_asm(4, 0);
+
+    // Measure time for C++ implementation
+    auto start_cpp = std::chrono::high_resolution_clock::now();
+    matrix2x2_cpp(A, B, C_cpp);
+    auto end_cpp = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::micro> duration_cpp = end_cpp - start_cpp;
+
+    // Measure time for assembly implementation
+    auto start_asm = std::chrono::high_resolution_clock::now();
+    matrix2x2(A.data(), B.data(), C_asm.data());
+    auto end_asm = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double, std::micro> duration_asm = end_asm - start_asm;
+
+    // Print results
+    std::cout << "C++ Result: ";
+    for (const auto& val : C_cpp) std::cout << val << " ";
+    std::cout << "\n";
+
+    std::cout << "Assembly Result: ";
+    for (const auto& val : C_asm) std::cout << val << " ";
+    std::cout << "\n";
+
+    std::cout << "C++ Duration: " << duration_cpp.count() << " microseconds\n";
+    std::cout << "Assembly Duration: " << duration_asm.count() << " microseconds\n";
+
+    return 0;
+}
+*/
