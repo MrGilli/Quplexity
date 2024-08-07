@@ -28,6 +28,16 @@ _pauli_Y:
 
     LDR W4, [X0, #0]
     LDR W5, [X0, #8]
-    
-    //NOT FINISHED
-    RET
+
+    //ROW 1
+    //0⋅α + -i⋅β
+    MUL W6, W2, W4
+    MUL W7, W3, W5
+    ADD W7, W7, W6
+    //IF NOT 0 OR NEGATIVE = -i
+
+    //ROW 2
+    //(i)⋅α + 0⋅β
+    MUL W8, W1, W4
+    MUL W9, W2, W5
+    ADD W9, W9, W8
