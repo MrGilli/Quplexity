@@ -1,3 +1,10 @@
+// © Jacob Liam Gill 2024. All rights reserved. **DO NOT REMOVE THIS LINE.**
+// Quplexity MUST be credited in the project you use it in either throughout documentation and/or in the code base. **DO NOT REMOVE THIS LINE.**
+
+// I'm striving to make the code for Quplexity as readable as possible.
+// If you would like to contribute or contact me for any other reason please don't hesitate to email me: jacobygill@outlook.com
+// Or DM/friend request me on Discord: @mrgill0651
+
 .global _define_imaginary
 .align 3
 
