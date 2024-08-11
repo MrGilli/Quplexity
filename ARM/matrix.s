@@ -1,4 +1,4 @@
-// © Jacob Liam Gill 2024. **DO NOT REMOVE THIS LINE.**
+// © Jacob Liam Gill 2024. All rights reserved. **DO NOT REMOVE THIS LINE.**
 // Quplexity MUST be credited in the project you use it in either throughout documentation and/or in the code base. **DO NOT REMOVE THIS LINE.**
 
 // I'm striving to make the code for Quplexity as readable as possible.
