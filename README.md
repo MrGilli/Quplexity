@@ -1,3 +1,5 @@
+[![Mentioned in Awesome - awesome-quantum-software](https://awesome.re/mentioned-badge.svg)](https://github.com/qosf/awesome-quantum-software)
+
 # Quplexity
 
 Quplexity is a blazingly fast and lightweight library that provides Quantum Computer (QC) simulators with their mathematical and essential logic. 
