@@ -8,9 +8,8 @@
 .global _pauli_X
 .global _pauli_Z
 .global _identity_matrix2x2
-.global _gills_hadamard2x2
+.global _gills_hadamard
 .align 3
-neg_one: .float -1.0
 
 _pauli_X:
     // Define pauli_X gate:
@@ -47,7 +46,6 @@ _pauli_X:
 
     RET                 //Return to caller
 
-//_pauli_Y not done yet!!
 //_pauli_Y:
     // Y = (0 -i ​i 0​)
     // Define pauli_Y gate
@@ -138,29 +136,34 @@ _identity_matrix2x2:
 
     RET
 
-    
-_gills_hadamard2x2:
+_gills_hadamard:
     LDR D1, [X0]
     LDR D2, [X0, #8]
-    LDR D3, [X0, #16]
-    LDR D4, [X0, #24]
+
+    FMOV D3, #1
+    FMOV D4, -1
+    
+    //2x2 x Qubit:
+    //Row 1:
+    FMUL D5, D3, D1
+    FMUL D6, D3, D2
+    FADD D5, D5, D6
+
+    //Row 2:
+    FMUL D6, D3, D1
+    FMUL D7, D4, D2
+    FADD D6, D6, D7
 
     // [H] = 1/sqrt(2)
-    FMOV D5, #1.0
-    FMOV D6, #2.0
-    FSQRT D7, D6
-    FDIV D0, D5, D7
+    FMOV D7, #2.0
+    FSQRT D8, D7
+    FDIV D0, D3, D8
 
     // Multiply each element of the 2x2 matrix by D0
-    FMUL D1, D1, D0
-    FMUL D2, D2, D0
-    FMUL D3, D3, D0
-    FMUL D4, D4, D0
+    FMUL D5, D0, D5
+    FMUL D6, D0, D6
 
-    STR D1, [X1, #0]
-    STR D2, [X1, #8]
-    STR D3, [X1, #16]
-    STR D4, [X1, #24]
-
-    // Return output 2x2 Matrix to caller.
+    STR D5, [X1, #0]
+    STR D6, [X1, #8]
+    
     RET 
