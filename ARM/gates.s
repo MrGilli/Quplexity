@@ -8,7 +8,7 @@
 .global _pauli_X
 .global _pauli_Z
 .global _identity_matrix2x2
-.global _gills_hadamard
+.global _hadamard
 .align 3
 
 _pauli_X:
@@ -136,7 +136,7 @@ _identity_matrix2x2:
 
     RET
 
-_gills_hadamard:
+_hadamard:
     LDR D1, [X0]
     LDR D2, [X0, #8]
 
