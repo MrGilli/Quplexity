@@ -8,9 +8,9 @@ section .bss
   n2 resq 1
 
 section .text
-  global _H
+  global _hadamard
 
-_H:
+_hadamard:
   ; Load input vector elements
   MOVSD XMM0, [RDI]       ; First element
   MOVSD XMM1, [RDI + 8]   ; Second element
