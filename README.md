@@ -38,7 +38,7 @@ gcc -no-pie cpp_file.asm assembly_object_file.o -o test
 
 #### For Extensive and indepth documentation please see the *.pdf files found in the folder/directory (./Documentation)
 
-## Authors
+## Author(s)
 
 Jacob Gill  
 
