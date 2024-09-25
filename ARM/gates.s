@@ -5,14 +5,18 @@
 // If you would like to contribute or contact me for any other reason please don't hesitate to email me: jacobygill@outlook.com
 // Or DM/friend request me on Discord: @mrgill0651
 
-.global _pauli_X
-.global _pauli_Z
-.global _identity_matrix2x2
-.global _hadamard
+.global _PX
+.global _PZ
+.global _IM2x2
+.global _H
+.global _CNOT
+.global _CCNOT
+.global _CZ
 .align 3
 
-_pauli_X:
-    // Define pauli_X gate:
+
+_PX:
+    // Define Pauli_X gate:
     // [0.0, 1.0]
     // [1.0, 0.0]
     FMOV D1, #0.0
@@ -65,12 +69,12 @@ _pauli_X:
     //VMRS APSR_nzcv, FPSCR // Move the result of the comparison to APSR (Application Program Status Register)
 
 
-_pauli_Z:
-    //Define pauli_X gate:
+_PZ:
+    //Define Pauli_Z gate:
     // [1.0,  0.0]
     // [0.0, -1.0]
     FMOV D1, #1.0   // D1 = 1.0
-    FMOV D2, #0.0   // D2 = 0.0
+    FMOV D2, 0.0   // D2 = 0.0
     // -1.0
     FMOV D3, #1.0   // D3 = -1.0
     FNEG D3, D3
@@ -96,11 +100,12 @@ _pauli_Z:
 
     RET                 // Return to caller.
 
-_identity_matrix2x2:
+_IM2x2:
+    //Identity Matrix
     // I=(1 0 ​0 1​)
     //(a×1 + b×0, ​a×0 + b×1)
     //(c×1 + d×0, c×0 + d×1​)
-    FMOV D1, #0.0
+    FMOV D1, 0.0
     FMOV D2, #1.0
     
     //Load Matrix(A) values
@@ -136,11 +141,11 @@ _identity_matrix2x2:
 
     RET
 
-_hadamard:
+_H:
     LDR D1, [X0]
     LDR D2, [X0, #8]
 
-    FMOV D3, #1
+    FMOV D3, #1.0
     FMOV D4, -1
     
     //2x2 x Qubit:
@@ -163,7 +168,151 @@ _hadamard:
     FMUL D5, D0, D5
     FMUL D6, D0, D6
 
-    STR D5, [X1, #0]
-    STR D6, [X1, #8]
+    STR D5, [X0, #0]
+    STR D6, [X0, #8]
     
     RET 
+
+_CNOT:
+    //1 CONTROL QUBIT, 1 TARGET QUBIT.
+    // Load QUBIT 1
+    LDR D1, [X0, #0]        
+    LDR D2, [X0, #8]        
+
+    // Load QUBIT 2
+    LDR D3, [X1, #0]        
+    LDR D4, [X1, #8]
+
+    FMOV D5, #2.0
+    FMOV D6, #0.0
+
+    FDIV D1, D1, D5 
+    FCMP D1, D6 
+    BNE ZERO
+
+    // Pauli-X gate matrix:
+    // | 0.0  1.0 |
+    // | 1.0  0.0 |
+    FMOV D1, #0.0           // Pauli-X element [0,0]
+    FMOV D2, #1.0           // Pauli-X element [0,1]
+
+    // Apply Pauli-X to QUBIT 3 (matrix multiplication)
+    // Row 1: [0.0 * a + 1.0 * b]
+    FMUL D7, D1, D3         
+    FMUL D8, D2, D4         
+    FADD D9, D7, D8         
+
+    // Row 2: [1.0 * a + 0.0 * b]
+    FMUL D10, D2, D3        
+    FMUL D11, D1, D4        
+    FADD D12, D11, D10      
+
+    // Store the new state of QUBIT 2 after applying Pauli-X gate
+    STR D9, [X1, #0]        
+    STR D12, [X1, #8]
+
+    RET
+
+_CCNOT:
+    //2 CONTROL QUBITS, 1 TARGET QUBIT.
+    // Load QUBIT 1
+    LDR D1, [X0, #0]        
+    LDR D2, [X0, #8]        
+
+    // Load QUBIT 2
+    LDR D3, [X1, #0]        
+    LDR D4, [X1, #8]        
+
+    // Load QUBIT 3
+    LDR D5, [X2, #0]
+    LDR D6, [X2, #8]        
+
+    // Constants for qubit checking (thresholds, etc.)
+    FMOV D7, #0.5           // 0.5 (threshold for checking superposition)
+    FMOV D8, #0.0           // 0.0
+    FMOV D9, #2.0           // 2.0 for normalizing
+
+    // Check if QUBIT 1 is in state |1>
+    FDIV D1, D1, D9         
+    FCMP D1, D8             // Compare with 0.5 (threshold for |1>)
+    BNE ZERO                // Branch to ZERO if Qubit 1 != 1
+
+    // Check if QUBIT 2 is in state |1>
+    FDIV D3, D3, D9         
+    FCMP D3, D8             // Compare with 0.5 (threshold for |1>)
+    BNE ZERO                // Branch to ZERO if Qubit 2 != 1
+
+    // Both Qubit 1 and Qubit 2 are in state |1>, apply Pauli-X gate to QUBIT 3
+
+    // Pauli-X gate matrix:
+    // | 0.0  1.0 |
+    // | 1.0  0.0 |
+    FMOV D1, #0.0           // Pauli-X element [0,0]
+    FMOV D2, #1.0           // Pauli-X element [0,1]
+
+    // Re-load QUBIT 3 (since values are normalized earlier)
+    LDR D3, [X2, #0]        
+    LDR D4, [X2, #8]        
+
+    // Apply Pauli-X to QUBIT 3 (matrix multiplication)
+    // Row 1: [0.0 * a + 1.0 * b]
+    FMUL D7, D1, D3         
+    FMUL D8, D2, D4         
+    FADD D9, D7, D8         
+
+    // Row 2: [1.0 * a + 0.0 * b]
+    FMUL D10, D2, D3        
+    FMUL D11, D1, D4        
+    FADD D12, D11, D10      
+
+    // Store the new state of QUBIT 3 after applying Pauli-X gate
+    STR D9, [X2, #0]        
+    STR D12, [X2, #8]       
+
+    RET
+
+_CZ:
+    // Load QUBIT 1
+    LDR D1, [X0, #0]        
+    LDR D2, [X0, #8]        
+
+    // Load QUBIT 2
+    LDR D3, [X1, #0]        
+    LDR D4, [X1, #8] 
+
+    FMOV D5, #2.0
+    FMOV D6, #0.0
+
+    FDIV D1, D1, D5 
+    FCMP D1, D6 
+    BNE ZERO
+
+    //Apply Pauli-Z
+    FMOV D1, #1.0   // D1 = 1.0
+    FMOV D2, 0.0   // D2 = 0.0
+    // -1.0
+    FMOV D3, #1.0   // D3 = -1.0
+    FNEG D3, D3
+
+
+    // (1⋅α + 0⋅β 
+    //  0⋅α + (−1)⋅β​)=(α−β​)
+    // ROW 1:
+    FMUL D7, D1, D3 //D7 = 1.0 * 0 = 0
+    FMUL D8, D2, D4 //D8 = 0.0 * 1.0 = 0
+    FADD D9, D7, D8 //D7 = 0 + 0 = 0
+
+    //ROW 2:
+    FMUL D10, D2, D3 //D8 = 0.0 * 0.0 = 0
+    FMUL D11, D3, D4 //D9 = -1 * 1 = -1
+    FADD D12, D10, D11 //D10 = 0 + (-1) = -1
+
+    STR D9, [X1, #0] // 0
+    STR D12, [X1, #8] // 0
+
+    RET                 // Return to caller.
+
+
+ZERO:
+    RET                     // If QUBIT 1 or QUBIT 2 was not in state |1>, return
+
