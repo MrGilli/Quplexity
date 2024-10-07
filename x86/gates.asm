@@ -1,24 +1,29 @@
 section .data
   sqrt2_inv dq 0.7071067811865475  ; 1/sqrt(2)
   one dq 1.0
+  zero dq 0.0
   neg_one dq -1.0
+  two dq 2.0
+  threshold dq 0.5
 
 section .bss
   n1 resq 1
   n2 resq 1
 
 section .text
-  global _hadamard
+  global _H
+  global _PX
+  global _CNOT
+  global _CCNOT
 
-_hadamard:
+_H:
   ; Load input vector elements
   MOVSD XMM0, [RDI]       ; First element
   MOVSD XMM1, [RDI + 8]   ; Second element
 
-  ; Load constants using RIP-relative addressing
-  MOVSD XMM2, [rip + one]
-  MOVSD XMM3, [rip + neg_one]
-  MOVSD XMM4, [rip + sqrt2_inv]
+  MOVSD XMM2, QWORD [one]
+  MOVSD XMM3, QWORD [neg_one]
+  MOVSD XMM4, QWORD [sqrt2_inv]
 
   ; Perform the Hadamard transformation
   ; Row 1
@@ -37,9 +42,91 @@ _hadamard:
   ADDSD XMM0, XMM1
   MULSD XMM0, XMM4
 
-  ; Store results
+  ;Store results
   MOVSD [RDI + 8], XMM0
   MOVSD XMM0, [n1]
   MOVSD [RDI], XMM0
 
+  RET
+
+_PX:
+  ; Load input vector elements
+  MOVSD XMM0, [RDI]       ; First element (qubit[0])
+  MOVSD XMM1, [RDI + 8]   ; Second element (qubit[1])
+
+  ; Perform Pauli-X operation (swapping elements)
+  ; qubit[0] = qubit[1], qubit[1] = qubit[0]
+  MOVSD XMM2, XMM1        ; Store qubit[1] into XMM2
+  MOVSD XMM1, XMM0        ; Store qubit[0] into XMM1
+  MOVSD [RDI], XMM2       ; Store XMM2 (old qubit[1]) into qubit[0]
+  MOVSD [RDI + 8], XMM1   ; Store XMM1 (old qubit[0]) into qubit[1]
+
+  RET
+
+_CNOT:
+  ;Fist Qubit (control)
+  MOVSD XMM0, [RDI]
+  MOVSD XMM1, [RDI + 8]
+
+  ;Second Qubit (Target)
+  MOVSD XMM2, [RSI]
+  MOVSD XMM3, [RSI + 8]
+
+  MOVSD XMM4, QWORD [two]
+  MOVSD XMM5, QWORD [zero]
+
+  DIVSD XMM0, XMM4
+  UCOMISS XMM0, XMM5
+
+  JP ZERO 
+
+  ; If control qubit is non-zero, apply Pauli-X
+  
+  MOVSD XMM4, XMM2           
+  MOVSD XMM2, XMM3           
+  MOVSD XMM3, XMM4           
+
+  ; Store the updated values back to the target qubit memory
+  MOVSD [RSI], XMM2
+  MOVSD [RSI + 8], XMM3
+
+  RET
+
+_CCNOT:
+  ; Load qubit 1 (control qubit 1)
+  MOVSD XMM1, [RDI + 8]    ; Load second element of qubit 1 into XMM1 (check if |1⟩)
+
+  ; Load qubit 2 (control qubit 2)
+  MOVSD XMM3, [RSI + 8]    ; Load second element of qubit 2 into XMM3 (check if |1⟩)
+
+  ; Load qubit 3 (target qubit)
+  MOVSD XMM5, [RDX]        ; Load first element of qubit 3 into XMM5
+  MOVSD XMM6, [RDX + 8]    ; Load second element of qubit 3 into XMM6
+
+  ; Constants for qubit checking
+  MOVSD XMM7, [one]       ; Load constant 1.0
+
+  ; Check if second element of qubit 1 (control qubit 1) is 1.0 (|1⟩ state)
+  UCOMISD XMM1, XMM7       ; Compare qubit 1's second element with 1.0
+  JNE ZERO                 ; Jump to ZERO if qubit 1 is not in |1⟩ state
+
+  ; Check if second element of qubit 2 (control qubit 2) is 1.0 (|1⟩ state)
+  UCOMISD XMM3, XMM7       ; Compare qubit 2's second element with 1.0
+  JNE ZERO                 ; Jump to ZERO if qubit 2 is not in |1⟩ state
+
+  ; Both control qubits are in |1⟩ state, apply Pauli-X (flip) to qubit 3
+
+  ; Pauli-X gate: swap the values of qubit 3 (target qubit)
+  MOVSD XMM7, XMM5         ; Temporarily store first element of qubit 3 in XMM7
+  MOVSD XMM5, XMM6         ; Move second element into the first element's place
+  MOVSD XMM6, XMM7         ; Move the original first element into the second element's place
+
+  ; Store the flipped values back to the target qubit memory
+  MOVSD [RDX], XMM5        ; Store flipped first element of qubit 3
+  MOVSD [RDX + 8], XMM6    ; Store flipped second element of qubit 3
+
+  RET
+
+ZERO:
+  ; No change to target qubit if control qubits are not both in |1⟩ state
   RET
