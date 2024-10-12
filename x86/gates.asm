@@ -11,10 +11,52 @@ section .bss
   n2 resq 1
 
 section .text
-  global _H
   global _PX
+  global _PZ
+  global _H
   global _CNOT
   global _CCNOT
+
+_PX:
+  ; Pauli-X Quantum Gate
+  ; Load input vector elements
+  MOVSD XMM0, [RDI]       ; First element (qubit[0])
+  MOVSD XMM1, [RDI + 8]   ; Second element (qubit[1])
+
+  ; Perform Pauli-X operation (swapping elements)
+  ; qubit[0] = qubit[1], qubit[1] = qubit[0]
+  MOVSD XMM2, XMM1        ; Store qubit[1] into XMM2
+  MOVSD XMM1, XMM0        ; Store qubit[0] into XMM1
+  MOVSD [RDI], XMM2       ; Store XMM2 (old qubit[1]) into qubit[0]
+  MOVSD [RDI + 8], XMM1   ; Store XMM1 (old qubit[0]) into qubit[1]
+
+  RET
+
+_PZ:
+  ; Pauli-Z Quantum Gate
+  ; Load input vector elements
+  MOVSD XMM0, [RDI]      ; Load the first element (a) into XMM0
+  MOVSD XMM1, [RDI + 8]  ; Load the second element (b) into XMM1
+
+  ; Pauli-Z matrix elements
+  ; [ 1.0,  0.0 ] * [ a ]
+  ; [ 0.0, -1.0 ] * [ b ]
+
+  MOVSD XMM2, QWORD [one]  
+  MOVSD XMM3, QWORD [zero] 
+
+  ; Row 1 
+  MULSD XMM2, XMM0  
+  MOVSD [RDI], XMM2
+
+  ; Row 2
+  MOVSD XMM3, QWORD [neg_one]
+  MULSD XMM3, XMM1 
+
+  MOVSD [RDI + 8], XMM3
+
+  RET
+
 
 _H:
   ; Load input vector elements
@@ -49,19 +91,6 @@ _H:
 
   RET
 
-_PX:
-  ; Load input vector elements
-  MOVSD XMM0, [RDI]       ; First element (qubit[0])
-  MOVSD XMM1, [RDI + 8]   ; Second element (qubit[1])
-
-  ; Perform Pauli-X operation (swapping elements)
-  ; qubit[0] = qubit[1], qubit[1] = qubit[0]
-  MOVSD XMM2, XMM1        ; Store qubit[1] into XMM2
-  MOVSD XMM1, XMM0        ; Store qubit[0] into XMM1
-  MOVSD [RDI], XMM2       ; Store XMM2 (old qubit[1]) into qubit[0]
-  MOVSD [RDI + 8], XMM1   ; Store XMM1 (old qubit[0]) into qubit[1]
-
-  RET
 
 _CNOT:
   ;Fist Qubit (control)
