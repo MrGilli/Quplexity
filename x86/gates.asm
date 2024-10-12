@@ -1,3 +1,11 @@
+; © Jacob Liam Gill 2024. All rights reserved. **DO NOT REMOVE THIS LINE.**
+; Quplexity MUST be credited in the project you use it in either throughout documentation and/or in the code base. **DO NOT REMOVE THIS LINE.**
+
+; I'm striving to make the code for Quplexity as readable as possible.
+; If you would like to contribute or contact me for any other reason please don't hesitate to email me: jacobygill@outlook.com
+; Or DM/friend request me on Discord: @mrgill0651
+
+
 section .data
   sqrt2_inv dq 0.7071067811865475  ; 1/sqrt(2)
   one dq 1.0
@@ -16,6 +24,7 @@ section .text
   global _H
   global _CNOT
   global _CCNOT
+  global _CZ
 
 _PX:
   ; Pauli-X Quantum Gate
@@ -56,7 +65,6 @@ _PZ:
   MOVSD [RDI + 8], XMM3
 
   RET
-
 
 _H:
   ; Load input vector elements
@@ -155,6 +163,37 @@ _CCNOT:
   MOVSD [RDX + 8], XMM6    ; Store flipped second element of qubit 3
 
   RET
+
+_CZ:
+  MOVSD XMM0, [RDI]
+  MOVSD XMM1, [zero]
+
+  UCOMISD XMM0, XMM1
+  JNE ZERO
+
+  MOVSD XMM0, [RSI]
+  MOVSD XMM1, [RSI + 8]
+
+  ; Apply Pauli-Z
+  ; Pauli-Z matrix elements
+  ; [ 1.0,  0.0 ] * [ a ]
+  ; [ 0.0, -1.0 ] * [ b ]
+
+  MOVSD XMM2, QWORD [one]  
+  MOVSD XMM3, QWORD [zero] 
+
+  ; Row 1 
+  MULSD XMM2, XMM0  
+  MOVSD [RSI], XMM2
+
+  ; Row 2
+  MOVSD XMM3, QWORD [neg_one]
+  MULSD XMM3, XMM1 
+
+  MOVSD [RSI + 8], XMM3
+
+  RET
+
 
 ZERO:
   ; No change to target qubit if control qubits are not both in |1⟩ state
