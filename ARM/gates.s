@@ -103,8 +103,7 @@ _PZ:
 _IM2x2:
     //Identity Matrix
     // I=(1 0 ​0 1​)
-    //(a×1 + b×0, ​a×0 + b×1)
-    //(c×1 + d×0, c×0 + d×1​)
+    
     FMOV D1, 0.0
     FMOV D2, #1.0
     
