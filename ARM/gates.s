@@ -12,6 +12,7 @@
 .global _CNOT
 .global _CCNOT
 .global _CZ
+.global _FREDKIN
 .align 3
 
 
@@ -103,7 +104,8 @@ _PZ:
 _IM2x2:
     //Identity Matrix
     // I=(1 0 ​0 1​)
-    
+    //(a×1 + b×0, ​a×0 + b×1)
+    //(c×1 + d×0, c×0 + d×1​)
     FMOV D1, 0.0
     FMOV D2, #1.0
     
@@ -173,10 +175,9 @@ _H:
     RET 
 
 _CNOT:
-    //1 CONTROL QUBIT, 1 TARGET QUBIT.
     // Load QUBIT 1
     LDR D1, [X0, #0]        
-    LDR D2, [X0, #8]        
+    LDR D2, [X0, #8]
 
     // Load QUBIT 2
     LDR D3, [X1, #0]        
@@ -185,88 +186,51 @@ _CNOT:
     FMOV D5, #2.0
     FMOV D6, #0.0
 
+    // Normalize and check control qubit
     FDIV D1, D1, D5 
     FCMP D1, D6 
-    BNE ZERO
+    BNE ZERO            // If not in |1> state, skip
 
-    // Pauli-X gate matrix:
-    // | 0.0  1.0 |
-    // | 1.0  0.0 |
-    FMOV D1, #0.0           // Pauli-X element [0,0]
-    FMOV D2, #1.0           // Pauli-X element [0,1]
+    // Apply Pauli-X by swapping qubits
+    FMOV D9, D3         // Row 1: Copy D3 (qubit 3's value)
+    FMOV D3, D4         // Row 2: Swap D4 into D3
+    FMOV D4, D9         // Store D3's original value into D4
 
-    // Apply Pauli-X to QUBIT 3 (matrix multiplication)
-    // Row 1: [0.0 * a + 1.0 * b]
-    FMUL D7, D1, D3         
-    FMUL D8, D2, D4         
-    FADD D9, D7, D8         
-
-    // Row 2: [1.0 * a + 0.0 * b]
-    FMUL D10, D2, D3        
-    FMUL D11, D1, D4        
-    FADD D12, D11, D10      
-
-    // Store the new state of QUBIT 2 after applying Pauli-X gate
-    STR D9, [X1, #0]        
-    STR D12, [X1, #8]
+    // Store the swapped values back to the target qubit
+    STR D3, [X1, #0]        
+    STR D4, [X1, #8]
 
     RET
 
+
 _CCNOT:
-    //2 CONTROL QUBITS, 1 TARGET QUBIT.
-    // Load QUBIT 1
+    // Load QUBIT 1 and QUBIT 2 (control qubits)
     LDR D1, [X0, #0]        
-    LDR D2, [X0, #8]        
+    LDR D3, [X1, #0]
 
-    // Load QUBIT 2
-    LDR D3, [X1, #0]        
-    LDR D4, [X1, #8]        
-
-    // Load QUBIT 3
-    LDR D5, [X2, #0]
+    // Load QUBIT 3 (target qubit)
+    LDR D5, [X2, #0]        
     LDR D6, [X2, #8]        
 
-    // Constants for qubit checking (thresholds, etc.)
-    FMOV D7, #0.5           // 0.5 (threshold for checking superposition)
-    FMOV D8, #0.0           // 0.0
-    FMOV D9, #2.0           // 2.0 for normalizing
+    // Normalize and check control qubits
+    FMOV D8, #0.0
+    FMOV D9, #2.0
+    FDIV D1, D1, D9
+    FDIV D3, D3, D9
 
-    // Check if QUBIT 1 is in state |1>
-    FDIV D1, D1, D9         
-    FCMP D1, D8             // Compare with 0.5 (threshold for |1>)
-    BNE ZERO                // Branch to ZERO if Qubit 1 != 1
+    FCMP D1, D8             
+    BNE ZERO                
+    FCMP D3, D8             
+    BNE ZERO                
 
-    // Check if QUBIT 2 is in state |1>
-    FDIV D3, D3, D9         
-    FCMP D3, D8             // Compare with 0.5 (threshold for |1>)
-    BNE ZERO                // Branch to ZERO if Qubit 2 != 1
+    // Apply Pauli-X by swapping qubit 3's values
+    FMOV D9, D5         
+    FMOV D5, D6         
+    FMOV D6, D9         
 
-    // Both Qubit 1 and Qubit 2 are in state |1>, apply Pauli-X gate to QUBIT 3
-
-    // Pauli-X gate matrix:
-    // | 0.0  1.0 |
-    // | 1.0  0.0 |
-    FMOV D1, #0.0           // Pauli-X element [0,0]
-    FMOV D2, #1.0           // Pauli-X element [0,1]
-
-    // Re-load QUBIT 3 (since values are normalized earlier)
-    LDR D3, [X2, #0]        
-    LDR D4, [X2, #8]        
-
-    // Apply Pauli-X to QUBIT 3 (matrix multiplication)
-    // Row 1: [0.0 * a + 1.0 * b]
-    FMUL D7, D1, D3         
-    FMUL D8, D2, D4         
-    FADD D9, D7, D8         
-
-    // Row 2: [1.0 * a + 0.0 * b]
-    FMUL D10, D2, D3        
-    FMUL D11, D1, D4        
-    FADD D12, D11, D10      
-
-    // Store the new state of QUBIT 3 after applying Pauli-X gate
-    STR D9, [X2, #0]        
-    STR D12, [X2, #8]       
+    // Store the swapped values back to the target qubit
+    STR D5, [X2, #0]        
+    STR D6, [X2, #8]
 
     RET
 
@@ -293,7 +257,6 @@ _CZ:
     FMOV D3, #1.0   // D3 = -1.0
     FNEG D3, D3
 
-
     // (1⋅α + 0⋅β 
     //  0⋅α + (−1)⋅β​)=(α−β​)
     // ROW 1:
@@ -311,7 +274,30 @@ _CZ:
 
     RET                 // Return to caller.
 
+_FREDKIN:
+    //Code for the Fredkin/Controlled Swap Gate (CSWAP)
+    //One control Qubit, two target qubits.
+    LDR D0, [X0, #0]    //Load first vector element of the control qubit
+
+    FMOV D1, #0.0
+    FCMP D1, D0
+    BNE ZERO 
+
+    // Load the two target qubits if the control qubit is 1
+    LDR D1, [X1, #0]    // Load the first element of target qubit 1 into D0
+    LDR D2, [X1, #8]    // Load the second element of target qubit 1 into D1
+
+    LDR D3, [X2, #0]    // Load the first element of target qubit 2 into D2
+    LDR D4, [X2, #8]    // Load the second element of target qubit 2 into D3
+
+    // Perform the SWAP operation
+    STR D1, [X2, #0]    // Store the first element of qubit 1 into qubit 2
+    STR D2, [X2, #8]    // Store the second element of qubit 1 into qubit 2
+
+    STR D3, [X1, #0]    // Store the first element of qubit 2 into qubit 1
+    STR D4, [X1, #8]    // Store the second element of qubit 2 into qubit 
+
+    RET
 
 ZERO:
     RET                     // If QUBIT 1 or QUBIT 2 was not in state |1>, return
-
