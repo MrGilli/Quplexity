@@ -12,6 +12,7 @@
 .global _CNOT
 .global _CCNOT
 .global _CZ
+.global _SWAP
 .global _FREDKIN
 .align 3
 
@@ -273,6 +274,23 @@ _CZ:
     STR D12, [X1, #8] // 0
 
     RET                 // Return to caller.
+
+_SWAP:
+    // Load the two target qubits if the control qubit is 1
+    LDR D1, [X0, #0]    // Load the first element of target qubit 1 into D0
+    LDR D2, [X0, #8]    // Load the second element of target qubit 1 into D1
+
+    LDR D3, [X1, #0]    // Load the first element of target qubit 2 into D2
+    LDR D4, [X1, #8]    // Load the second element of target qubit 2 into D3
+
+    // Perform the SWAP operation
+    STR D1, [X1, #0]    // Store the first element of qubit 1 into qubit 2
+    STR D2, [X1, #8]    // Store the second element of qubit 1 into qubit 2
+
+    STR D3, [X0, #0]    // Store the first element of qubit 2 into qubit 1
+    STR D4, [X0, #8]    // Store the second element of qubit 2 into qubit 
+
+    RET
 
 _FREDKIN:
     //Code for the Fredkin/Controlled Swap Gate (CSWAP)
