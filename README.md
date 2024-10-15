@@ -1,4 +1,5 @@
 [![Mentioned in Awesome - awesome-quantum-software](https://awesome.re/mentioned-badge.svg)](https://github.com/qosf/awesome-quantum-software)
+[![github release](https://img.shields.io/github/release/)](https://github.com/MrGilli/Quplexity/releases/tag/Quplexity_ARM_and_x86_library_v1.0.0)
 
 # Quplexity
 
