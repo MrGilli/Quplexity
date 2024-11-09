@@ -45,4 +45,4 @@ Jacob Gill
 
 contact: jacobygill@outlook.com 
 
-Discord: @mrgill0651
+Discord: @bixel0
