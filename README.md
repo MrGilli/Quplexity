@@ -17,7 +17,7 @@ To add your project email me or submit a pull request.
 ### Dependencies
 
 Install the following to build/run Quplexity on your machine: 
-* nasm (for intel ASM)
+* nasm (for intel and x86 ASM)
 * as   (for ARM/ARM64 ASM)
 * gcc & g++
 
