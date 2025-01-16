@@ -97,8 +97,8 @@ _PZ:
     FMUL D11, D3, D6 //D9 = -1 * 1 = -1
     FADD D12, D10, D11 //D10 = 0 + (-1) = -1
 
-    STR D9, [X1, #0] // 0
-    STR D12, [X1, #8] // 0
+    STR D9, [X0, #0] // 0
+    STR D12, [X0, #8] // 0
 
     RET                 // Return to caller.
 
@@ -293,29 +293,32 @@ _SWAP:
     RET
 
 _FREDKIN:
-    //Code for the Fredkin/Controlled Swap Gate (CSWAP)
-    //One control Qubit, two target qubits.
-    LDR D0, [X0, #0]    //Load first vector element of the control qubit
+    // Load the first element of the control qubit
+    LDR D0, [X0, #0]    // Control qubit value at X0
 
-    FMOV D1, #0.0
-    FCMP D1, D0
-    BNE ZERO 
+    FMOV D1, #0.0       // Set D1 to 0.0 for comparison
+    FCMP D1, D0         // Compare control qubit with 0.0
+    BNE PERFORM_SWAP    // If control qubit is |1⟩, perform swap
 
-    // Load the two target qubits if the control qubit is 1
-    LDR D1, [X1, #0]    // Load the first element of target qubit 1 into D0
-    LDR D2, [X1, #8]    // Load the second element of target qubit 1 into D1
+    RET                 // If control qubit is |0⟩, return without changes
 
-    LDR D3, [X2, #0]    // Load the first element of target qubit 2 into D2
-    LDR D4, [X2, #8]    // Load the second element of target qubit 2 into D3
+PERFORM_SWAP:
+    // Load the two target qubits
+    LDR D1, [X1, #0]    // Target qubit 1 (qubit2[0])
+    LDR D2, [X1, #8]    // Target qubit 1 (qubit2[1])
 
-    // Perform the SWAP operation
-    STR D1, [X2, #0]    // Store the first element of qubit 1 into qubit 2
-    STR D2, [X2, #8]    // Store the second element of qubit 1 into qubit 2
+    LDR D3, [X2, #0]    // Target qubit 2 (qubit[0])
+    LDR D4, [X2, #8]    // Target qubit 2 (qubit[1])
 
-    STR D3, [X1, #0]    // Store the first element of qubit 2 into qubit 1
-    STR D4, [X1, #8]    // Store the second element of qubit 2 into qubit 
+    // Perform the swap
+    STR D1, [X2, #0]    // Store qubit2[0] into qubit[0]
+    STR D2, [X2, #8]    // Store qubit2[1] into qubit[1]
 
-    RET
+    STR D3, [X1, #0]    // Store qubit[0] into qubit2[0]
+    STR D4, [X1, #8]    // Store qubit[1] into qubit2[1]
+
+    RET                 // Return to caller after performing swap
+
 
 ZERO:
     RET                     // If QUBIT 1 or QUBIT 2 was not in state |1>, return
