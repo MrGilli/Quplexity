@@ -1,7 +1,7 @@
 [![Mentioned in Awesome - awesome-quantum-software](https://awesome.re/mentioned-badge.svg)](https://github.com/qosf/awesome-quantum-software)
 [![github release](https://img.shields.io/github/v/release/MrGilli/Quplexity.svg)](https://github.com/MrGilli/Quplexity/releases/tag/Quplexity_ARM_and_x86_library_v1.0.0)
 
-# Quplexity
+# What Is Quplexity?
 
 Quplexity is a blazingly fast and lightweight (modular) library that provides Quantum Computer (QC) simulators with their mathematical and essential quantum logic gates. 
 Quplexity is written in "Assembly" aka "Assembler" for very fast execution and computational times. Quplexity has exstensive and carefully crafted documentation, to help anyone no matter what their technological fluency is, to integrate Quplexity into their project or contribute to the project itself. Documentation and Examples can be found in the folder (./Documentation). Quplexity is currently in the process of being intergrated into Qrack (https://github.com/unitaryfund/qrack) to provide accelerated performance and better tailored hardware support. 
