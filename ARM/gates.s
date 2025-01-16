@@ -1,4 +1,4 @@
-// © Jacob Liam Gill 2024. All rights reserved. **DO NOT REMOVE THIS LINE.**
+// © Jacob Liam Gill 2025. All rights reserved. **DO NOT REMOVE THIS LINE.**
 // Quplexity MUST be credited in the project you use it in either throughout documentation and/or in the code base. **DO NOT REMOVE THIS LINE.**
 
 // I'm striving to make the code for Quplexity as readable as possible.
@@ -47,8 +47,8 @@ _PX:
 
     //Output the new state of the qubit after 
     //the Pauli-X gate has been applied
-    STR D9, [X1, #0]    //D9 = Output matrix [0]
-    STR D12, [X1, #8]   //D12 = Output matrix [1]
+    STR D9, [X0, #0]    //D9 = Output matrix [0]
+    STR D12, [X0, #8]   //D12 = Output matrix [1]
 
     RET                 //Return to caller
 
