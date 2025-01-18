@@ -31,7 +31,7 @@ nasm -f elf64 assembly_file.asm -o assembly_object_file.o
 ```
 ###### Then link with your C/C++ file:
 ```bash
-gcc -no-pie cpp_file.asm assembly_object_file.o -o test
+gcc -no-pie c_file.c assembly_object_file.o -o test
 ```
 ###### To run the example above:
 ```bash
