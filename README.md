@@ -1,5 +1,8 @@
 [![Mentioned in Awesome - awesome-quantum-software](https://awesome.re/mentioned-badge.svg)](https://github.com/qosf/awesome-quantum-software)
 [![github release](https://img.shields.io/github/v/release/MrGilli/Quplexity.svg)](https://github.com/MrGilli/Quplexity/releases/tag/Quplexity_ARM_and_x86_library_v1.0.0)
+![OS](https://img.shields.io/badge/os-MacOS-9cbd3c.svg)
+![OS](https://img.shields.io/badge/os-Linux-9cbd3c.svg)
+![OS](https://img.shields.io/badge/os-Windows-9cbd3c.svg)
 
 # What Is Quplexity?
 
