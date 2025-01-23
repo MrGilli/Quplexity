@@ -1,4 +1,4 @@
-// © Jacob Liam Gill 2025. All rights reserved. **DO NOT REMOVE THIS LINE.**
+// © Jacob Liam Gill 2024. All rights reserved. **DO NOT REMOVE THIS LINE.**
 // Quplexity MUST be credited in the project you use it in either throughout documentation and/or in the code base. **DO NOT REMOVE THIS LINE.**
 
 // I'm striving to make the code for Quplexity as readable as possible.
@@ -14,6 +14,7 @@
 .global _CZ
 .global _SWAP
 .global _FREDKIN
+.global _CP
 .align 3
 
 
@@ -319,6 +320,44 @@ PERFORM_SWAP:
 
     RET                 // Return to caller after performing swap
 
+_CP:
+    // needed help from GPT with this one.
+    // Load control qubit (qubit 1)
+    LDR D1, [X0, #0]        
+    LDR D2, [X0, #8]        
+
+    // Load target qubit (qubit 2)
+    LDR D3, [X1, #0]        
+    LDR D4, [X1, #8]        
+
+    // Load the phase angle (e.g., pi/2)
+    LDR D5, [X2, #0]        
+    LDR D6, [X2, #8]        
+
+    FMOV D7, #0.0           
+    FMOV D8, #1.0          
+
+    FDIV D1, D1, D8         
+    FDIV D2, D2, D8         
+
+    FCMP D1, D7             // Compare D1 with 0 (check if control qubit is |1⟩)
+    BNE ZERO                // If control qubit is not |1⟩, skip phase gate
+
+    
+    FMUL D9, D3, D5         // D9 = target real * phase real
+    FMUL D10, D4, D6        // D10 = target imaginary * phase imaginary
+    FADD D9, D9, D10        // D9 = target real * phase real + target imaginary * phase imaginary
+
+    FMUL D10, D3, D6        // D10 = target real * phase imaginary
+    FMUL D11, D4, D5        // D11 = target imaginary * phase real
+    FADD D10, D10, D11      // D10 = target real * phase imaginary + target imaginary * phase real
+
+    
+    STR D9, [X1, #0]        
+    STR D10, [X1, #8]   
+
+    RET    
+    
 
 ZERO:
     RET                     // If QUBIT 1 or QUBIT 2 was not in state |1>, return
