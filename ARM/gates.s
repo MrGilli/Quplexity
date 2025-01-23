@@ -1,4 +1,4 @@
-// © Jacob Liam Gill 2024. All rights reserved. **DO NOT REMOVE THIS LINE.**
+// © Jacob Liam Gill 2025. All rights reserved. **DO NOT REMOVE THIS LINE.**
 // Quplexity MUST be credited in the project you use it in either throughout documentation and/or in the code base. **DO NOT REMOVE THIS LINE.**
 
 // I'm striving to make the code for Quplexity as readable as possible.
@@ -18,11 +18,12 @@
 .align 3
 
 
+
 _PX:
     // Define Pauli_X gate:
     // [0.0, 1.0]
     // [1.0, 0.0]
-    FMOV D1, #0.0
+    LDR D1, =0x0000000000000000
     FMOV D2, #1.0
 
     //Load supplied state vector values:
@@ -77,7 +78,7 @@ _PZ:
     // [1.0,  0.0]
     // [0.0, -1.0]
     FMOV D1, #1.0   // D1 = 1.0
-    FMOV D2, 0.0   // D2 = 0.0
+    LDR D2, =0x0000000000000000   // D2 = 0.0
     // -1.0
     FMOV D3, #1.0   // D3 = -1.0
     FNEG D3, D3
@@ -108,7 +109,7 @@ _IM2x2:
     // I=(1 0 ​0 1​)
     //(a×1 + b×0, ​a×0 + b×1)
     //(c×1 + d×0, c×0 + d×1​)
-    FMOV D1, 0.0
+    LDR D1, =0x0000000000000000
     FMOV D2, #1.0
     
     //Load Matrix(A) values
@@ -186,7 +187,7 @@ _CNOT:
     LDR D4, [X1, #8]
 
     FMOV D5, #2.0
-    FMOV D6, #0.0
+    LDR D6, =0x0000000000000000
 
     // Normalize and check control qubit
     FDIV D1, D1, D5 
@@ -215,7 +216,7 @@ _CCNOT:
     LDR D6, [X2, #8]        
 
     // Normalize and check control qubits
-    FMOV D8, #0.0
+    LDR D8, =0x0000000000000000
     FMOV D9, #2.0
     FDIV D1, D1, D9
     FDIV D3, D3, D9
@@ -246,7 +247,7 @@ _CZ:
     LDR D4, [X1, #8] 
 
     FMOV D5, #2.0
-    FMOV D6, #0.0
+    LDR D6, =0x0000000000000000
 
     FDIV D1, D1, D5 
     FCMP D1, D6 
@@ -254,7 +255,7 @@ _CZ:
 
     //Apply Pauli-Z
     FMOV D1, #1.0   // D1 = 1.0
-    FMOV D2, 0.0   // D2 = 0.0
+    LDR D2, =0x0000000000000000  // D2 = 0.0
     // -1.0
     FMOV D3, #1.0   // D3 = -1.0
     FNEG D3, D3
@@ -297,7 +298,7 @@ _FREDKIN:
     // Load the first element of the control qubit
     LDR D0, [X0, #0]    // Control qubit value at X0
 
-    FMOV D1, #0.0       // Set D1 to 0.0 for comparison
+    LDR D1, =0x0000000000000000       // Set D1 to 0.0 for comparison
     FCMP D1, D0         // Compare control qubit with 0.0
     BNE PERFORM_SWAP    // If control qubit is |1⟩, perform swap
 
@@ -321,43 +322,47 @@ PERFORM_SWAP:
     RET                 // Return to caller after performing swap
 
 _CP:
-    // needed help from GPT with this one.
+    //The unit 'i' is approximated to pi/2
     // Load control qubit (qubit 1)
-    LDR D1, [X0, #0]        
-    LDR D2, [X0, #8]        
+    LDR D1, [X0, #0]        // Load real part of qubit 1
+    LDR D2, [X0, #8]        // Load imaginary part of qubit 1
 
     // Load target qubit (qubit 2)
-    LDR D3, [X1, #0]        
-    LDR D4, [X1, #8]        
+    LDR D3, [X1, #0]        // Load real part of qubit 2
+    LDR D4, [X1, #8]        // Load imaginary part of qubit 2
 
     // Load the phase angle (e.g., pi/2)
-    LDR D5, [X2, #0]        
-    LDR D6, [X2, #8]        
+    LDR D5, [X2, #0]        // Load real part of phase angle
+    LDR D6, [X2, #8]        // Load imaginary part of phase angle (if any)
 
-    FMOV D7, #0.0           
-    FMOV D8, #1.0          
+    LDR D7, =0x0000000000000000  // Load 0 (for comparison)
+    FMOV D8, #1.0            // Constant 1 for normalization
 
+    // Normalize the control qubit's state
     FDIV D1, D1, D8         
     FDIV D2, D2, D8         
 
-    FCMP D1, D7             // Compare D1 with 0 (check if control qubit is |1⟩)
-    BNE ZERO                // If control qubit is not |1⟩, skip phase gate
+    FCMP D1, D7              // Check if control qubit is in state |1⟩
+    BEQ ZERO                 // If control qubit is not |1⟩, skip phase application
 
-    
+    // Apply the phase shift if control qubit is |1⟩
+    // Multiply target qubit by the phase angle: e^(i*phase) = cos(phase) + i*sin(phase)
+
+    // Real part of the target qubit after applying phase
     FMUL D9, D3, D5         // D9 = target real * phase real
     FMUL D10, D4, D6        // D10 = target imaginary * phase imaginary
     FADD D9, D9, D10        // D9 = target real * phase real + target imaginary * phase imaginary
 
+    // Imaginary part of the target qubit after applying phase
     FMUL D10, D3, D6        // D10 = target real * phase imaginary
     FMUL D11, D4, D5        // D11 = target imaginary * phase real
     FADD D10, D10, D11      // D10 = target real * phase imaginary + target imaginary * phase real
 
-    
-    STR D9, [X1, #0]        
-    STR D10, [X1, #8]   
+    // Store the updated target qubit values back
+    STR D9, [X1, #0]        // Store the real part of qubit 2
+    STR D10, [X1, #8]       // Store the imaginary part of qubit 2
 
-    RET    
-    
+    RET                      // Return from function
 
 ZERO:
-    RET                     // If QUBIT 1 or QUBIT 2 was not in state |1>, return
+    RET                      // Return if control qubit is not in state |1⟩
