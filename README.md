@@ -16,7 +16,7 @@ To add your project email me or submit a pull request.
 * [theQ & Quantum Quokka](https://github.com/devitt1/theQ) - Quantum Computing simulation project, By Dr. S.J. Devitt and Prof. C. Ferrie at QSI@UTS
 
 ## Getting Started!
-Please check ./quplexity_manual.pdf to learn how to use all Quplexity functions in your C/C++ project.
+Please check ./quplexity_manual.pdf (https://github.com/MrGilli/Quplexity/blob/main/quplexity_manual.pdf) to learn how to use all Quplexity functions in your C/C++ project.
 
 ### Dependencies
 
