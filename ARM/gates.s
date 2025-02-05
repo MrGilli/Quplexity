@@ -322,7 +322,6 @@ PERFORM_SWAP:
     RET                 // Return to caller after performing swap
 
 _CP:
-    //The unit 'i' is approximated to pi/2
     // Load control qubit (qubit 1)
     LDR D1, [X0, #0]        // Load real part of qubit 1
     LDR D2, [X0, #8]        // Load imaginary part of qubit 1
