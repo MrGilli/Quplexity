@@ -3,7 +3,7 @@
 
 // I'm striving to make the code for Quplexity as readable as possible.
 // If you would like to contribute or contact me for any other reason please don't hesitate to email me: jacobygill@outlook.com
-// Or DM/friend request me on Discord: @mrgill0651
+// Or DM/friend request me on Discord: @bixel0
 
 .global _PX
 .global _PZ
