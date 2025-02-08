@@ -7,16 +7,12 @@
 
 
 section .data
-  sqrt2_inv dq 0.7071067811865475  ; 1/sqrt(2)
-  one dq 1.0
-  zero dq 0.0
-  neg_one dq -1.0
-  two dq 2.0
-  threshold dq 0.5
-
-section .bss
-  n1 resq 1
-  n2 resq 1
+ align 16
+  sqrt2_inv dq 0.7071067811865475, 0.7071067811865475  ; 1/sqrt(2)
+ align 16
+  one_state dq 0.0, 1.0
+ align 16 
+  const dq 1.0, -1.0
 
 section .text
   global _PX
@@ -28,171 +24,94 @@ section .text
 
 _PX:
   ; Pauli-X Quantum Gate
-  ; Load input vector elements
-  MOVSD XMM0, [RDI]       ; First element (qubit[0])
-  MOVSD XMM1, [RDI + 8]   ; Second element (qubit[1])
+  ; Load qubit
+  MOVAPD XMM0, [RDI]       ; The "high" half of XMM0 contains qubit[0], the "low" half contains qubit[1]
 
   ; Perform Pauli-X operation (swapping elements)
   ; qubit[0] = qubit[1], qubit[1] = qubit[0]
-  MOVSD XMM2, XMM1        ; Store qubit[1] into XMM2
-  MOVSD XMM1, XMM0        ; Store qubit[0] into XMM1
-  MOVSD [RDI], XMM2       ; Store XMM2 (old qubit[1]) into qubit[0]
-  MOVSD [RDI + 8], XMM1   ; Store XMM1 (old qubit[0]) into qubit[1]
+  SHUFPD XMM0, XMM0, 01b
+  MOVAPD [RDI], XMM0        ; Store qubit[0] into XMM1
 
   RET
 
 _PZ:
   ; Pauli-Z Quantum Gate
-  ; Load input vector elements
-  MOVSD XMM0, [RDI]      ; Load the first element (a) into XMM0
-  MOVSD XMM1, [RDI + 8]  ; Load the second element (b) into XMM1
+  ; Load qubit
+  MOVAPD XMM0, [RDI]       ; The "high" half of XMM0 contains qubit[0], the "low" half contains qubit[1]
 
   ; Pauli-Z matrix elements
   ; [ 1.0,  0.0 ] * [ a ]
   ; [ 0.0, -1.0 ] * [ b ]
 
-  MOVSD XMM2, QWORD [one]  
-  MOVSD XMM3, QWORD [zero] 
-
-  ; Row 1 
-  MULSD XMM2, XMM0  
-  MOVSD [RDI], XMM2
-
-  ; Row 2
-  MOVSD XMM3, QWORD [neg_one]
-  MULSD XMM3, XMM1 
-
-  MOVSD [RDI + 8], XMM3
+  MULPD XMM0, [const]
+  MOVAPD [RDI], XMM0
 
   RET
 
 _H:
-  ; Load input vector elements
-  MOVSD XMM0, [RDI]       ; First element
-  MOVSD XMM1, [RDI + 8]   ; Second element
+  MOVAPD XMM0, [RDI]       ; xmm0 = [ q[0], q[1] ]
+  
+  MOVAPD XMM1, XMM0
+  MULPD XMM1, [const] ; xmm1 = [ q[0], -q[1] ]
 
-  MOVSD XMM2, QWORD [one]
-  MOVSD XMM3, QWORD [neg_one]
-  MOVSD XMM4, QWORD [sqrt2_inv]
-
-  ; Perform the Hadamard transformation
-  ; Row 1
-  MULSD XMM0, XMM2
-  MULSD XMM1, XMM2
-  ADDSD XMM0, XMM1          ; XMM0 = x1 + x2
-
-  MULSD XMM0, XMM4          ; XMM0 *= 1/sqrt(2)
-  MOVSD [n1], XMM0
-
-  ; Row 2
-  MOVSD XMM0, [RDI]         ; Reload the first element into XMM0
-  MOVSD XMM1, [RDI + 8]     ; Reload second element
-  MULSD XMM0, XMM2
-  MULSD XMM1, XMM3
-  ADDSD XMM0, XMM1
-  MULSD XMM0, XMM4
-
-  ;Store results
-  MOVSD [RDI + 8], XMM0
-  MOVSD XMM0, [n1]
-  MOVSD [RDI], XMM0
+  HADDPD XMM0, XMM1; xmm0 = [ q[0] + q[1], q[0] - q[1] ]
+  MULPD XMM0, [sqrt2_inv]
+  MOVAPD [RDI], XMM0
 
   RET
 
 
 _CNOT:
-  ;Fist Qubit (control)
-  MOVSD XMM0, [RDI]
-  MOVSD XMM1, [RDI + 8]
-
-  ;Second Qubit (Target)
-  MOVSD XMM2, [RSI]
-  MOVSD XMM3, [RSI + 8]
-
-  MOVSD XMM4, QWORD [two]
-  MOVSD XMM5, QWORD [zero]
-
-  DIVSD XMM0, XMM4
-  UCOMISS XMM0, XMM5
-
-  JP ZERO 
-
-  ; If control qubit is non-zero, apply Pauli-X
+; checking wheter the control qubit is in the |1> state ([0.0, 1.0])
+  MOVAPD XMM0, [RDI]
+  CMPPD XMM0, [one_state], 0; testing for equality
+  PTEST XMM0, XMM0; if not equal -> XMM0 = 0x0000...
+  JZ ret               
   
-  MOVSD XMM4, XMM2           
-  MOVSD XMM2, XMM3           
-  MOVSD XMM3, XMM4           
+  MOVAPD XMM1, [RSI]; target qubit
+  SHUFPD XMM1, XMM1, 01b
+  MOVAPD [RSI], XMM1
 
-  ; Store the updated values back to the target qubit memory
-  MOVSD [RSI], XMM2
-  MOVSD [RSI + 8], XMM3
-
-  RET
+ret: RET
 
 _CCNOT:
-  ; Load qubit 1 (control qubit 1)
-  MOVSD XMM1, [RDI + 8]    ; Load second element of qubit 1 into XMM1 (check if |1⟩)
+  ; Load control qubit 1
+  MOVAPD XMM0, [RDI]
+  CMPPD XMM0, [one_state], 0; testing for equality
+  PTEST XMM0, XMM0; if not equal -> XMM0 = 0x0000... 
+  JZ retcc
 
-  ; Load qubit 2 (control qubit 2)
-  MOVSD XMM3, [RSI + 8]    ; Load second element of qubit 2 into XMM3 (check if |1⟩)
-
-  ; Load qubit 3 (target qubit)
-  MOVSD XMM5, [RDX]        ; Load first element of qubit 3 into XMM5
-  MOVSD XMM6, [RDX + 8]    ; Load second element of qubit 3 into XMM6
-
-  ; Constants for qubit checking
-  MOVSD XMM7, [one]       ; Load constant 1.0
-
-  ; Check if second element of qubit 1 (control qubit 1) is 1.0 (|1⟩ state)
-  UCOMISD XMM1, XMM7       ; Compare qubit 1's second element with 1.0
-  JNE ZERO                 ; Jump to ZERO if qubit 1 is not in |1⟩ state
-
-  ; Check if second element of qubit 2 (control qubit 2) is 1.0 (|1⟩ state)
-  UCOMISD XMM3, XMM7       ; Compare qubit 2's second element with 1.0
-  JNE ZERO                 ; Jump to ZERO if qubit 2 is not in |1⟩ state
+  ; Load control qubit 2
+  MOVAPD XMM0, [RSI]
+  CMPPD XMM0, [one_state], 0
+  PTEST XMM0, XMM0
+  JZ retcc
 
   ; Both control qubits are in |1⟩ state, apply Pauli-X (flip) to qubit 3
+  ; Load qubit 3 (target qubit)
+  MOVAPD XMM0, [RDX]
 
   ; Pauli-X gate: swap the values of qubit 3 (target qubit)
-  MOVSD XMM7, XMM5         ; Temporarily store first element of qubit 3 in XMM7
-  MOVSD XMM5, XMM6         ; Move second element into the first element's place
-  MOVSD XMM6, XMM7         ; Move the original first element into the second element's place
+  SHUFPD XMM0, XMM0, 01b  
 
   ; Store the flipped values back to the target qubit memory
-  MOVSD [RDX], XMM5        ; Store flipped first element of qubit 3
-  MOVSD [RDX + 8], XMM6    ; Store flipped second element of qubit 3
+  MOVAPD [RDX], XMM0 
 
-  RET
+retcc:  RET
 
 _CZ:
-  MOVSD XMM0, [RDI]
-  MOVSD XMM1, [zero]
+  ; Load control qubit
+  MOVAPD XMM0, [RDI]
+  CMPPD XMM0, [one_state], 0; testing for equality
+  PTEST XMM0, XMM0; if not equal -> XMM0 = 0x0000...
+  JZ retz
 
-  UCOMISD XMM0, XMM1
-  JNE ZERO
+  ; Load target qubit - since the control is |1> we apply Pauli Z
+  MOVAPD XMM0, [RSI]
+  MULPD XMM0, [const]
+  MOVAPD [RSI], XMM0
 
-  MOVSD XMM0, [RSI]
-  MOVSD XMM1, [RSI + 8]
-
-  ; Apply Pauli-Z
-  ; Pauli-Z matrix elements
-  ; [ 1.0,  0.0 ] * [ a ]
-  ; [ 0.0, -1.0 ] * [ b ]
-
-  MOVSD XMM2, QWORD [one]  
-  MOVSD XMM3, QWORD [zero] 
-
-  ; Row 1 
-  MULSD XMM2, XMM0  
-  MOVSD [RSI], XMM2
-
-  ; Row 2
-  MOVSD XMM3, QWORD [neg_one]
-  MULSD XMM3, XMM1 
-
-  MOVSD [RSI + 8], XMM3
-
-  RET
+retz:  RET
 
 
 ZERO:
