@@ -52,8 +52,8 @@ _PZ:
   RET
 
 _PY:
-  MOVAPD XMM0, [RDI]       ; XMM0 = (α_real, α_imag)
-  MOVAPD XMM1, [RDI + 16]  ; XMM1 = (β_real, β_imag)
+  MOVAPD XMM0, [RDI]       ; XMM0 = (alpha _real, _imag)
+  MOVAPD XMM1, [RDI + 16]  ; XMM1 = (beta _real, _imag)
 
   SHUFPD XMM2, XMM1, 01b    ; Flip to work on imag part
   MULPD  XMM2, [neg_imag] 
@@ -67,8 +67,8 @@ _PY:
   RET
 
 _H:
-  MOVAPD XMM0, [RDI]       ; XMM0 = (alphaα_real, α_imag)
-  MOVAPD XMM1, [RDI + 16]  ; XMM1 = (betaβ_real, β_imag)
+  MOVAPD XMM0, [RDI]       ; XMM0 = (alpha _real, _imag)
+  MOVAPD XMM1, [RDI + 16]  ; XMM1 = (beta _real, _imag)
 
 
   MOVAPD XMM2, XMM0
