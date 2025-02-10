@@ -13,10 +13,13 @@ section .data
   one_state dq 0.0, 1.0
  align 16 
   const dq 1.0, -1.0
+ align 16
+  neg_imag dq 0.0, -1.0, 1.0, 0.0   ; For multiplying by -i and i
 
 section .text
   global _PX
   global _PZ
+  global _PY
   global _H
   global _CNOT
   global _CCNOT
@@ -48,9 +51,24 @@ _PZ:
 
   RET
 
+_PY:
+  MOVAPD XMM0, [RDI]       ; XMM0 = (α_real, α_imag)
+  MOVAPD XMM1, [RDI + 16]  ; XMM1 = (β_real, β_imag)
+
+  SHUFPD XMM2, XMM1, 01b    ; Flip to work on imag part
+  MULPD  XMM2, [neg_imag] 
+
+  SHUFPD XMM3, XMM0, 01b  
+  MULPD  XMM3, [neg_imag]
+
+  MOVAPD [RDI], XMM2
+  MOVAPD [RDI + 16], XMM3
+
+  RET
+
 _H:
-  MOVAPD XMM0, [RDI]       ; XMM0 = (alpha _real, _imag)
-  MOVAPD XMM1, [RDI + 16]  ; XMM1 = (beta _real, _imag)
+  MOVAPD XMM0, [RDI]       ; XMM0 = (alphaα_real, α_imag)
+  MOVAPD XMM1, [RDI + 16]  ; XMM1 = (betaβ_real, β_imag)
 
 
   MOVAPD XMM2, XMM0
@@ -69,8 +87,6 @@ _H:
   MOVAPD [RDI + 16], XMM3
 
   RET
-
-
 
 
 _CNOT:
