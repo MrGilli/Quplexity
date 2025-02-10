@@ -1,0 +1,522 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{geometry}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{tcolorbox}
+\usepackage{amsmath} % For mathematical typesetting
+
+\geometry{margin=1in}
+
+\title{Quplexity User Manual}
+\author{Jacob Liam Gill}
+\date{Jan 2025}
+
+\begin{document}
+
+\maketitle
+
+\section*{1. Abstract \& Overview}
+Quantum Computer Simulators (QCS's) are often complex pieces of technology where performance is essential.
+Most modern QCS's like Qrack and Qiskit are written in either Python or C/C++.
+C++ being the more popular and suitable option for performant simulators. Despite C++ being performant and fast in nature,
+x86 and ARM/ARM64 Assembly, when written and utilized correctly, proves to be significantly faster than C++ whilst also being extremely lightweight in nature.
+This paper looks at how I have successfully utilized the Assembly language to provide performance and "weight" benefits to QCS's and the like. All the code for this project can be viewed on the Quplexity GitHub.
+
+\section*{2. ARM and ARM64 Functions}
+This section will detail how to use and work with x86 and Intel-based Quplexity functions in your C/C++ project. Before trying to use Quplexity functions, ensure
+that you have downloaded the Quplexity repository and it is located in the root directory of your project. If you have any issues, feel free to email me at: jacobygill@outlook.com
+\textbf{If you are using an M1/M2 Mac, please remove the underscore (\_) in your C/C++ code}.
+
+\subsection*{2.1 Pauli-X Gate}
+The Pauli-X gate, also known as the quantum NOT gate, is a single-qubit quantum gate that flips the state of a qubit. If the input is \(|0\rangle\), it outputs \(|1\rangle\), and if the input is \(|1\rangle\), it outputs \(|0\rangle\). Mathematically, it is represented by the matrix:
+
+\[
+X = \begin{bmatrix}
+0 & 1 \\
+1 & 0
+\end{bmatrix}
+\]
+
+This gate is analogous to the classical NOT gate but operates on quantum states. It can also act on superposition states, flipping the amplitudes between \(|0\rangle\) and \(|1\rangle\).
+Example use of the Quplexity Pauli-X gate:
+
+\begin{lstlisting}[language=C, frame=single]
+#include <stdio.h>
+
+extern double _PX(double *qubit);
+
+int main() {
+    double qubit[2] = {0.0, 1.0};
+    _PX(qubit);
+    printf("%f, %f\n", qubit[0], qubit[1]);
+    return 0;
+}
+\end{lstlisting}
+
+\subsection*{2.2 Pauli-Z Gate}
+The Pauli-Z gate is a single-qubit quantum gate that applies a phase flip to the \(|1\rangle\) state while leaving the \(|0\rangle\) state unchanged. If the input is \(|0\rangle\), the output remains \(|0\rangle\), but if the input is \(|1\rangle\), the output becomes \(-|1\rangle\). Mathematically, it is represented by the matrix:
+
+\[
+Z = \begin{bmatrix}
+1 & 0 \\
+0 & -1
+\end{bmatrix}
+\]
+
+This gate is a fundamental operation in quantum computing and is often used to manipulate the relative phase of quantum states.
+Example use of the Quplexity Pauli-Z gate:
+
+\begin{lstlisting}[language=C, frame=single]
+#include <stdio.h>
+
+extern double _PZ(double *qubit);
+
+int main(){
+    double qubit[2] = {0.0, 1.0};
+    _PZ(qubit);
+    printf("%f, %f\n", qubit[0], qubit[1]);
+    return 0;
+}
+\end{lstlisting}
+
+\subsection*{2.3 Hadamard Gate}
+The Hadamard gate is a single-qubit quantum gate that creates superposition states. It transforms the basis states \(|0\rangle\) and \(|1\rangle\) into equal superpositions:
+
+\[
+H|0\rangle = \frac{1}{\sqrt{2}}(|0\rangle + |1\rangle), \quad H|1\rangle = \frac{1}{\sqrt{2}}(|0\rangle - |1\rangle).
+\]
+
+Mathematically, it is represented by the matrix:
+
+\[
+H = \frac{1}{\sqrt{2}} \begin{bmatrix}
+1 & 1 \\
+1 & -1
+\end{bmatrix}.
+\]
+
+The Hadamard gate is essential in quantum computing as it enables the creation of superpositions, a key feature of quantum algorithms.
+
+Example use of the Quplexity Hadamard gate:
+
+\begin{lstlisting}[language=C, frame=single]
+#include <stdio.h>
+
+extern double _H(double *qubit);
+
+int main(){
+    double qubit[2] = {0.0, 1.0};
+    _H(qubit);
+    printf("%f, %f\n", qubit[0], qubit[1]);
+    return 0;
+}
+\end{lstlisting}
+
+\subsection*{2.4 Controlled Not Gate}
+The Controlled NOT (CNOT) gate is a two-qubit quantum gate that flips the state of the target qubit if the control qubit is in the \(|1\rangle\) state. It acts as follows:
+
+\[
+\text{CNOT}|00\rangle = |00\rangle, \quad \text{CNOT}|01\rangle = |01\rangle,
+\]
+\[
+\text{CNOT}|10\rangle = |11\rangle, \quad \text{CNOT}|11\rangle = |10\rangle.
+\]
+
+Mathematically, it is represented by the matrix:
+
+\[
+\text{CNOT} = \begin{bmatrix}
+1 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 \\
+0 & 0 & 0 & 1 \\
+0 & 0 & 1 & 0
+\end{bmatrix}.
+\]
+
+The CNOT gate is a fundamental two-qubit operation in quantum computing and is crucial for creating entanglement between qubits.
+Example use of the Quplexity CNOT gate:
+
+\begin{lstlisting}[language=C, frame=single]
+#include <stdio.h>
+
+extern double _CNOT(double *qubit, double *qubit2);
+
+int main(){
+    double qubit[2] = {0.0, 1.0};
+    double qubit2[2] = {0.0, 1.0};
+    _CNOT(qubit, qubit2);
+    printf("%f, %f\n", qubit2[0], qubit2[1]);
+    return 0;
+}
+\end{lstlisting}
+
+\subsection*{2.5 Controlled Controlled Not Gate}
+The Controlled-Controlled NOT (CCNOT) gate, or Toffoli gate, is a three-qubit quantum gate. It flips the state of the target qubit if and only if both control qubits are in the \(|1\rangle\) state. The operation is defined as follows:
+
+\[
+\text{CCNOT}|abc\rangle = |ab(c \oplus (a \land b))\rangle,
+\]
+
+where \(\oplus\) represents addition modulo 2 (XOR), and \(\land\) represents the logical AND operation.
+
+The truth table for the CCNOT gate is:
+\[
+\begin{aligned}
+|000\rangle & \to |000\rangle, \quad & |100\rangle & \to |100\rangle, \\
+|001\rangle & \to |001\rangle, \quad & |101\rangle & \to |101\rangle, \\
+|010\rangle & \to |010\rangle, \quad & |110\rangle & \to |111\rangle, \\
+|011\rangle & \to |011\rangle, \quad & |111\rangle & \to |110\rangle.
+\end{aligned}
+\]
+
+Mathematically, it is represented by the 8x8 matrix:
+
+\[
+\text{CCNOT} = \begin{bmatrix}
+1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 \\
+0 & 0 & 0 & 0 & 0 & 0 & 1 & 0
+\end{bmatrix}.
+\]
+
+The CCNOT gate is significant in quantum computing for its ability to perform reversible universal classical computation and is commonly used in quantum algorithms.
+Example use of the Quplexity CCNOT gate:
+
+\begin{lstlisting}[language=C, frame=single]
+#include <stdio.h>
+
+extern double _CCNOT(double *qubit, double *qubit2, double *qubit3);
+
+int main(){
+    double qubit[2] = {0.0, 1.0};
+    double qubit2[2] = {0.0, 1.0};
+    double qubit3[2] = {0.0, 1.0};
+    _CCNOT(qubit, qubit2, qubit3);
+    printf("%f, %f\n", qubit3[0], qubit3[1]);
+    return 0;
+}
+\end{lstlisting}
+
+\subsection*{2.6 Controlled-Z Gate}
+The Controlled-Z (CZ) gate is a two-qubit quantum gate that applies a phase flip (Z gate) to the target qubit if the control qubit is in the \(|1\rangle\) state. It acts as follows:
+
+\[
+\text{CZ}|00\rangle = |00\rangle, \quad \text{CZ}|01\rangle = |01\rangle,
+\]
+\[
+\text{CZ}|10\rangle = |10\rangle, \quad \text{CZ}|11\rangle = -|11\rangle.
+\]
+
+Mathematically, it is represented by the matrix:
+
+\[
+\text{CZ} = \begin{bmatrix}
+1 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 \\
+0 & 0 & 1 & 0 \\
+0 & 0 & 0 & -1
+\end{bmatrix}.
+\]
+
+The CZ gate is essential in quantum computing for creating entangled states and is often used in conjunction with other gates to build quantum circuits.
+Example use of the Quplexity CZ gate:
+
+\begin{lstlisting}[language=C, frame=single]
+#include <stdio.h>
+
+extern double _CZ(double *qubit, double *qubit2);
+
+int main(){
+    double qubit[2] = {0.0, 1.0};
+    double qubit2[2] = {0.0, 1.0};
+    _CZ(qubit, qubit2);
+    printf("%f, %f\n", qubit2[0], qubit2[1]);
+    return 0;
+}
+\end{lstlisting}
+
+\subsection*{2.7 SWAP Gate}
+The SWAP gate is a two-qubit quantum gate that exchanges the states of two qubits. It acts as follows:
+
+\[
+\text{SWAP}|a, b\rangle = |b, a\rangle,
+\]
+
+where \(|a\rangle\) and \(|b\rangle\) are the states of the two qubits.
+
+Mathematically, the SWAP gate is represented by the matrix:
+
+\[
+\text{SWAP} = \begin{bmatrix}
+1 & 0 & 0 & 0 \\
+0 & 0 & 1 & 0 \\
+0 & 1 & 0 & 0 \\
+0 & 0 & 0 & 1
+\end{bmatrix}.
+\]
+
+The SWAP gate is useful in quantum computing for rearranging qubits in a circuit.
+Example use of the Quplexity SWAP gate:
+
+\begin{lstlisting}[language=C, frame=single]
+#include <stdio.h>
+
+extern double _SWAP(double *qubit, double *qubit2);
+
+int main(){
+    double qubit[2] = {1.0, 0.0};
+    double qubit2[2] = {0.0, 1.0};
+    _SWAP(qubit, qubit2);
+    printf("%f, %f\n", qubit[0], qubit[1]);
+    printf("%f, %f\n", qubit2[0], qubit2[1]);
+    return 0;
+}
+\end{lstlisting}
+
+\subsection*{2.8 FREDKIN (Controlled-SWAP) Gate}
+The Fredkin gate, also known as the Controlled-SWAP gate, is a three-qubit quantum gate that swaps the states of two target qubits if and only if the control qubit is in the \(|1\rangle\) state. It acts as follows:
+
+\[
+\text{Fredkin}|c, a, b\rangle = \begin{cases}
+|c, b, a\rangle, & \text{if } c = 1, \\
+|c, a, b\rangle, & \text{if } c = 0.
+\end{cases}
+\]
+
+Mathematically, the Fredkin gate is represented by the 8x8 matrix:
+
+\[
+\text{Fredkin} = \begin{bmatrix}
+1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 \\
+0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 \\
+0 & 0 & 0 & 0 & 0 & 0 & 0 & 1
+\end{bmatrix}.
+\]
+
+The Fredkin gate is significant in reversible computing and is used in quantum circuits to conditionally exchange qubits.
+Example use of the Quplexity SWAP gate: \textbf{(Not Currently Working)}
+
+\begin{lstlisting}[language=C, frame=single]
+#include <stdio.h>
+
+extern double _FREDKIN(double *qubit, double *qubit2);
+
+int main(){
+    double qubit[2] = {1.0, 0.0};
+    double qubit2[2] = {0.0, 1.0};
+    _FREDKIN(qubit, qubit2);
+    printf("%f, %f\n", qubit[0], qubit[1]);
+    printf("%f, %f\n", qubit2[0], qubit2[1]);
+    return 0;
+}
+\end{lstlisting}
+
+\subsection*{2.9 Controlled Phase Shift (CP) Gate}
+
+The Controlled Phase Shift (CP) gate is a two-qubit quantum gate that applies a phase shift to the target qubit if the control qubit is in the \(|1\rangle\) state. The operation is defined as follows:
+
+\[
+\text{CP}|ab\rangle =
+\begin{cases}
+|ab\rangle, & \text{if } a = 0, \\
+e^{i\phi}|ab\rangle, & \text{if } a = 1,
+\end{cases}
+\]
+
+where \(a\) represents the state of the control qubit, \(b\) represents the state of the target qubit, and \(\phi\) is the phase angle.
+
+The truth table for the CP gate is:
+
+\[
+\begin{aligned}
+|00\rangle &\to |00\rangle, \quad & |10\rangle &\to |10\rangle, \\
+|01\rangle &\to |01\rangle, \quad & |11\rangle &\to e^{i\phi}|11\rangle.
+\end{aligned}
+\]
+
+Mathematically, it is represented by the \(4 \times 4\) matrix:
+
+\[
+\text{CP} = \begin{bmatrix}
+1 & 0 & 0 & 0 \\
+0 & 1 & 0 & 0 \\
+0 & 0 & 1 & 0 \\
+0 & 0 & 0 & e^{i\phi}
+\end{bmatrix}.
+\]
+
+The CP gate is significant in quantum computing for implementing controlled phase shifts, which are essential for many quantum algorithms, including those that leverage entanglement and interference.
+
+Example use of the Quplexity CP gate:
+
+\begin{lstlisting}[language=C, frame=single]
+#include <stdio.h>
+
+extern void _CP(double* control_qubit, double* target_qubit, 
+               double* phase_angle);
+
+int main(){
+    double control_qubit[2] = {1.0, 0.0};
+    double target_qubit[2] = {0.0, 1.0};
+    double phase_angle[2] = {3.14159 / 2.0, 0.0};
+
+    _CP(control_qubit, target_qubit, phase_angle);
+
+    printf("%f, %f)\n", target_qubit[0], target_qubit[1]);
+    return 0;
+}
+\end{lstlisting}
+
+\section*{3. Intel and x86 Functions}
+This section will detail how to use and work with x86 and Intel-based Quplexity functions in your C/C++ project. Before trying to use Quplexity functions, ensure
+that you have downloaded the Quplexity repository and it is located in the root directory of your project. If you have any issues, feel free to email me at: jacobygill@outlook.com
+
+\subsection*{3.1 Initial Setup}
+To work with the x86 version of the Quplexity library, you must have $nasm$ and $gcc/g++$ installed on your machine.
+In your C/C++ file, add the following lines to ensure interaction and use of the x86 Quplexity library is done correctly.
+
+\begin{lstlisting}[language=C, frame=single]
+#include <stdio.h>
+#include <xmmintrin.h>
+#include <math.h>
+
+static inline double* init(double ar, double ai, double br, double bi) {
+    double* q = _mm_malloc(4 * sizeof(double), 16);
+    q[0] = ar;  // alpha real
+    q[1] = ai;  // alpha imag
+    q[2] = br;  // beta real
+    q[3] = bi;  // beta imag
+    return q;
+}
+
+void print_qubit(const char* label, double* q) {
+    printf("%s: alpha = %lf + %lfi, beta = %lf + %lfi\n", 
+            label, q[0], q[1], q[2], q[3]);
+}
+
+int main(){
+    // Rest of your quantum computer simulation code...
+    return 0;
+}
+\end{lstlisting}
+
+\noindent The $init$ C/C++ function initializes a qubit to be a vector of 4 (r = real, i = imaginary): (1) $|\alpha_{r}\rangle$ and $|\alpha_{i}\rangle$, (2) $|\beta_{r}\rangle$ and $|\beta_{i}\rangle$.
+Given this, if you set a qubit to the state $|0\rangle>$ the qubits elements will be: $\alpha_{r} = 1$, $\alpha_{i} = 0i$, $\beta_{r} = 0$, $\beta_{i} = 0i$.
+
+
+\subsection*{3.2 Pauli-X Gate}
+The Pauli-X gate, also known as the quantum NOT gate, is a single-qubit quantum gate that flips the state of a qubit. If the input is \(|0\rangle\), it outputs \(|1\rangle\), and if the input is \(|1\rangle\), it outputs \(|0\rangle\). Mathematically, it is represented by the matrix:
+
+\[
+X = \begin{bmatrix}
+0 & 1 \\
+1 & 0
+\end{bmatrix}
+\]
+
+This gate is analogous to the classical NOT gate but operates on quantum states. It can also act on superposition states, flipping the amplitudes between \(|0\rangle\) and \(|1\rangle\).
+Example use of the Quplexity Pauli-X gate:
+
+\begin{lstlisting}[language=C, frame=single]
+/*
+    PLACE CODE FROM SUBSECTION 3.1 HERE...
+*/
+
+extern void _PX(double *qubit);
+
+int main() {
+    ...
+}
+\end{lstlisting}
+
+\newpage
+
+\subsection*{3.3 Pauli-Y Gate}
+The Pauli-Y gate is a single-qubit quantum gate that performs a bit-flip similar to the Pauli-X gate but also introduces a phase flip. It is represented by the following matrix:
+
+\[
+Y = \begin{bmatrix}
+0 & -i \\
+i & 0
+\end{bmatrix}
+\]
+
+Unlike the Pauli-X gate, which simply swaps \(|0\rangle\) and \(|1\rangle\), the Pauli-Y gate introduces a factor of \(i\) or \(-i\), making it a key component in certain quantum algorithms. It also preserves the norm of quantum states while changing their phase.  
+
+Example use of the Quplexity Pauli-Y gate:
+
+\begin{lstlisting}[language=C, frame=single]
+/*
+    PLACE CODE FROM SUBSECTION 3.1 HERE...
+*/
+
+extern void _PY(double *qubit);
+
+int main() {
+    double* qubit = init(1.0, 0.0, 0.0, 0.0); // |0> state
+    print_qubit("Initial Qubit", qubit);
+
+    _PY(qubit);
+    print_qubit("After Pauli-Y", qubit);
+    return 0;
+}
+\end{lstlisting}
+
+\subsection*{3.4 Hadamard Gate}
+The Hadamard gate is a single-qubit quantum gate that creates superposition states. It transforms the basis states \(|0\rangle\) and \(|1\rangle\) into equal superpositions:
+
+\[
+H|0\rangle = \frac{1}{\sqrt{2}}(|0\rangle + |1\rangle), \quad H|1\rangle = \frac{1}{\sqrt{2}}(|0\rangle - |1\rangle).
+\]
+
+Mathematically, it is represented by the matrix:
+
+\[
+H = \frac{1}{\sqrt{2}} \begin{bmatrix}
+1 & 1 \\
+1 & -1
+\end{bmatrix}.
+\]
+
+The Hadamard gate is essential in quantum computing as it enables the creation of superpositions, a key feature of quantum algorithms.
+
+Example use of the Quplexity Hadamard gate:
+
+\begin{lstlisting}[language=C, frame=single]
+/*
+    PLACE CODE FROM SUBSECTION 3.1 HERE...
+*/
+
+extern void _H(double *qubit);
+
+int main() {
+    double* qubit = init(1.0, 0.0, 0.0, 0.0); // |0> state
+    print_qubit("Initial Qubit", qubit);
+
+    _H(qubit);
+    print_qubit("After Hadamard", qubit);
+    return 0;
+}
+\end{lstlisting}
+
+
+
+
+
+\section*{4. Using Quplexity in a Python Project}
+...
+
+\end{document}
