@@ -49,16 +49,28 @@ _PZ:
   RET
 
 _H:
-  MOVAPD XMM0, [RDI]       ; xmm0 = [ q[0], q[1] ]
-  
-  MOVAPD XMM1, XMM0
-  MULPD XMM1, [const] ; xmm1 = [ q[0], -q[1] ]
+  MOVAPD XMM0, [RDI]       ; XMM0 = (alpha _real, _imag)
+  MOVAPD XMM1, [RDI + 16]  ; XMM1 = (beta _real, _imag)
 
-  HADDPD XMM0, XMM1; xmm0 = [ q[0] + q[1], q[0] - q[1] ]
-  MULPD XMM0, [sqrt2_inv]
-  MOVAPD [RDI], XMM0
+
+  MOVAPD XMM2, XMM0
+  ADDPD XMM2, XMM1
+
+
+  MOVAPD XMM3, XMM0
+  SUBPD XMM3, XMM1   
+
+  ; Scale both results by 1/sqrt(2)
+  MULPD XMM2, [sqrt2_inv]
+  MULPD XMM3, [sqrt2_inv]
+
+  
+  MOVAPD [RDI], XMM2       
+  MOVAPD [RDI + 16], XMM3
 
   RET
+
+
 
 
 _CNOT:
