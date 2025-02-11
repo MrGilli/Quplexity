@@ -42,4 +42,4 @@ gcc -no-pie c_file.c assembly_object_file.o -o test
 
 ## Author(s)
 * [Jacob Gill]{Founder & lead developer}(Contact: Email = jacobygill@outlook.com, Discord = @bixel0)  
-* [Gabriella Talarico]{Lead developer}(Contact: Discord = @gabriellaxenia19)
+* [Gabriella Xenia Talarico]{Lead developer}(Contact: Discord = @gabriellaxenia19)
