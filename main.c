@@ -23,25 +23,8 @@ void print_qubit(const char* label, double* q) {
 }
 
 int main() {
-    double* qubit = init(1.0, 0.0, 0.0, 0.0); // |0⟩ state
-    print_qubit("Initial Qubit", qubit);
-
-    _H(qubit);
-    print_qubit("After Hadamard", qubit);
-
-    double* control = init(0.0, 0.0, 1.0, 0.0); // |1⟩
-    double* target = init(1.0, 0.0, 0.0, 0.0);  // |0⟩
-    _CNOT(control, target);
-    print_qubit("Target After CNOT", target);
-
-    _CZ(control, target);
-    print_qubit("Target After CZ", target);
-
-    double* q1 = init(0.0, 0.0, 1.0, 0.0); // |1⟩
-    double* q2 = init(0.0, 0.0, 1.0, 0.0); // |1⟩
-    double* q3 = init(1.0, 0.0, 0.0, 0.0); // |0⟩
-    _CCNOT(q1, q2, q3);
-    print_qubit("Q3 After CCNOT", q3);
+    printf("Add your Quantum Computer Simulation logic here...\n");
+    printf("==> Check out ./Examples or quplexity_manual to get started!!\n\n");
 
     return 0;
 }
