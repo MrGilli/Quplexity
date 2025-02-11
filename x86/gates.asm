@@ -21,6 +21,7 @@ section .text
   global _PZ
   global _PY
   global _H
+  global _H_basic
   global _CNOT
   global _CCNOT
   global _CZ
@@ -52,8 +53,8 @@ _PZ:
   RET
 
 _PY:
-  MOVAPD XMM0, [RDI]       ; XMM0 = (alpha _real, _imag)
-  MOVAPD XMM1, [RDI + 16]  ; XMM1 = (beta _real, _imag)
+  MOVAPD XMM0, [RDI]       ; XMM0 = (α_real, α_imag)
+  MOVAPD XMM1, [RDI + 16]  ; XMM1 = (β_real, β_imag)
 
   SHUFPD XMM2, XMM1, 01b    ; Flip to work on imag part
   MULPD  XMM2, [neg_imag] 
@@ -67,8 +68,8 @@ _PY:
   RET
 
 _H:
-  MOVAPD XMM0, [RDI]       ; XMM0 = (alpha _real, _imag)
-  MOVAPD XMM1, [RDI + 16]  ; XMM1 = (beta _real, _imag)
+  MOVAPD XMM0, [RDI]       ; XMM0 = (alphaα_real, α_imag)
+  MOVAPD XMM1, [RDI + 16]  ; XMM1 = (betaβ_real, β_imag)
 
 
   MOVAPD XMM2, XMM0
@@ -85,6 +86,17 @@ _H:
   
   MOVAPD [RDI], XMM2       
   MOVAPD [RDI + 16], XMM3
+
+  RET
+
+_H_basic:
+  MOVAPD XMM0, [RDI]       ; xmm0 = [ q[0], q[1] ]
+  
+  MOVAPD XMM1, XMM0
+  MULPD XMM1, [const] ; xmm1 = [ q[0], -q[1] ]
+  HADDPD XMM0, XMM1; xmm0 = [ q[0] + q[1], q[0] - q[1] ]
+  MULPD XMM0, [sqrt2_inv]
+  MOVAPD [RDI], XMM0
 
   RET
 
