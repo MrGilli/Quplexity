@@ -14,11 +14,15 @@ section .data
  align 16 
   const dq 1.0, -1.0
  align 16
-  neg_imag dq 0.0, -1.0, 1.0, 0.0   ; For multiplying by -i and i
+  negOne_one dq -1.0, 1.0
+ align 16
+  const_negOne dq -1.0, -1.0
 
 section .text
   global _PX
+  global _PX_basic
   global _PZ
+  global _PZ_basic
   global _PY
   global _H
   global _H_basic
@@ -27,6 +31,14 @@ section .text
   global _CZ
 
 _PX:
+  MOVAPD XMM0, [RDI]       ; XMM0 = (alpha_real, alpha_imag)
+  MOVAPD XMM1, [RDI + 16]  ; XMM1 = (beta_real, beta_imag)
+  ; Applying Pauli-X Quantum Gate
+  MOVAPD [RDI], XMM1
+  MOVAPD [RDI+16], XMM0
+  RET
+
+_PX_basic:
   ; Pauli-X Quantum Gate
   ; Load qubit
   MOVAPD XMM0, [RDI]       ; The "high" half of XMM0 contains qubit[0], the "low" half contains qubit[1]
@@ -39,6 +51,12 @@ _PX:
   RET
 
 _PZ:
+  MOVAPD XMM0, [RDI+16] ; XMM1 = (beta_real, beta_imag) 
+  MULPD XMM0, [const_negOne]; Applying Pauli-Z
+  MOVAPD [RDI+16], XMM0
+  RET
+
+_PZ_basic:
   ; Pauli-Z Quantum Gate
   ; Load qubit
   MOVAPD XMM0, [RDI]       ; The "high" half of XMM0 contains qubit[0], the "low" half contains qubit[1]
@@ -56,14 +74,14 @@ _PY:
   MOVAPD XMM0, [RDI]       ; XMM0 = (α_real, α_imag)
   MOVAPD XMM1, [RDI + 16]  ; XMM1 = (β_real, β_imag)
 
-  SHUFPD XMM2, XMM1, 01b    ; Flip to work on imag part
-  MULPD  XMM2, [neg_imag] 
+  SHUFPD XMM1, XMM1, 01b
+  MULPD  XMM1, [const] 
 
-  SHUFPD XMM3, XMM0, 01b  
-  MULPD  XMM3, [neg_imag]
+  SHUFPD XMM0, XMM0, 01b 
+  MULPD  XMM0, [negOne_one]
 
-  MOVAPD [RDI], XMM2
-  MOVAPD [RDI + 16], XMM3
+  MOVAPD [RDI], XMM1
+  MOVAPD [RDI + 16], XMM0
 
   RET
 
@@ -71,21 +89,17 @@ _H:
   MOVAPD XMM0, [RDI]       ; XMM0 = (alphaα_real, α_imag)
   MOVAPD XMM1, [RDI + 16]  ; XMM1 = (betaβ_real, β_imag)
 
-
   MOVAPD XMM2, XMM0
   ADDPD XMM2, XMM1
 
-
-  MOVAPD XMM3, XMM0
-  SUBPD XMM3, XMM1   
+  SUBPD XMM0, XMM1   
 
   ; Scale both results by 1/sqrt(2)
   MULPD XMM2, [sqrt2_inv]
-  MULPD XMM3, [sqrt2_inv]
+  MULPD XMM0, [sqrt2_inv]
 
-  
   MOVAPD [RDI], XMM2       
-  MOVAPD [RDI + 16], XMM3
+  MOVAPD [RDI + 16], XMM0
 
   RET
 
