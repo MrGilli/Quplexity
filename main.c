@@ -24,7 +24,7 @@ void print_qubit(const char* label, double* q) {
 
 int main() {
     printf("Add your Quantum Computer Simulation logic here...\n");
-    printf("==> Check out ./Examples or quplexity_manual to get started!!\n\n");
+    printf("==> Check out ./Examples or quplexity_manual.pdf to get started!!\n\n");
 
     return 0;
 }
