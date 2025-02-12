@@ -44,7 +44,7 @@ gcc -no-pie c_file.c assembly_object_file.o -o test
 The Quplexity library has many examples and tests to ensure that its implemented and functioning as it should be. All examples are located in the ./Examples folder.
 The directory ./Examples/x86 holds all the examples that will run on machines using the x86 architecture. Conversely, the directory ./Examples/ARM64 holds all the examples that will run on machines using the ARM64/Aarch64 architecture. 
 
-#### Running the Grovers-Search Algorithm for x86:
+### Running the Grovers-Search Algorithm for x86:
 In the root directory of the Quplexity project, run the following commands
 ```bash
 nasm -f elf64 ./x86/gates.asm -o ./x86/gates.o
