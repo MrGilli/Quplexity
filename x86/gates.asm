@@ -116,17 +116,23 @@ _H_basic:
 
 
 _CNOT:
-; checking wheter the control qubit is in the |1> state ([0.0, 1.0])
-  MOVAPD XMM0, [RDI]
-  CMPPD XMM0, [one_state], 0; testing for equality
-  PTEST XMM0, XMM0; if not equal -> XMM0 = 0x0000...
-  JZ ret               
+  MOVAPD XMM0, [RDI]       ; Load control qubit (ca[0], cb[1])
+  MOVAPD XMM1, [RSI]       ; Load target qubit (ta[0], tb[1])
+
+  MOVAPD XMM2, XMM0        ; Copy control qubit to XMM2
+  MULPD XMM2, XMM1         ; Multiply control qubit with target qubit (element-wise)
   
-  MOVAPD XMM1, [RSI]; target qubit
-  SHUFPD XMM1, XMM1, 01b
+  MOVAPD XMM3, XMM0        ; Copy control qubit again
+  MULPD XMM3, [one_state]  ; Multiply with |1> state to extract amplitude of |1⟩
+
+  PTEST XMM3, XMM3         ; If control qubit has no amplitude in |1>, skip swap
+  JZ ret
+
+  SHUFPD XMM1, XMM1, 01b   ; Swap target qubit amplitudes (Pauli-X)
   MOVAPD [RSI], XMM1
 
 ret: RET
+
 
 _CCNOT:
   ; Load control qubit 1
