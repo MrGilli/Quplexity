@@ -29,40 +29,38 @@ _PX:
     LDR D5, [X0, #0]        //; D5 = qubit vector 1;
     LDR D6, [X0, #8]        //; D6 = qubit vector 2;
 
-    //Apply pauli_X given a state vector full of types: doubles/floats
-    //ROW 1
+    //; Apply pauli_X given a state vector full of types: doubles/floats
+    //; ROW 1
     FMUL D7, D1, D5         //; D7 = 0 * a
     FMUL D8, D2, D6         //; D8 = 1 * b
     FADD D9, D7, D8         //; D9 = D7 + D8
-    //ROW 2
+    //; ROW 2
     FMUL D10, D2, D5        //; D10 = 1 * a
     FMUL D11, D1, D6        //; D11 = 0 * b
     FADD D12, D11, D10      //; D12 = D11 + D10
 
-    //Output the new state of the qubit after
-    //the Pauli-X gate has been applied
+    //; Output the new state of the qubit after
+    //; the Pauli-X gate has been applied
     STR D9, [X0, #0]        //; D9 = Output matrix [0]
     STR D12, [X0, #8]       //; D12 = Output matrix [1]
 
     RET                     //; Return to caller
 
-//_pauli_Y:
-    // Y = (0 -i ​i 0​)
-    // Define pauli_Y gate
-    //FMOV D1, #0.0
-    //FMOV D2, #1.0
+//; _pauli_Y:
+    //;  Y = (0 -i ​i 0​)
+    //;  Define pauli_Y gate
+    //; FMOV D1, #0.0
+    //; FMOV D2, #1.0
 
-    //LDR D3, [X0, #0]      // = a
-    //LDR D4, [X0, #8]      // = b
+    //; LDR D3, [X0, #0]      // = a
+    //; LDR D4, [X0, #8]      // = b
 
-    // (0⋅α + -i⋅β
-    //  (i)⋅α + 0⋅β​)=(α−β​)
-    // ROW 1
-    //FMUL D5, D1, D2
-    //FMUL D6, D2, D4
-    //FADD D7, D5, D6
-    //VCMPE.D64 D7, D1      // Compare double-precision floating-point values in D7 and D1
-    //VMRS APSR_nzcv, FPSCR // Move the result of the comparison to APSR (Application Program Status Register)
+    //; ROW 1
+    //; FMUL D5, D1, D2
+    //; FMUL D6, D2, D4
+    //; FADD D7, D5, D6
+    //; VCMPE.D64 D7, D1      // Compare double-precision floating-point values in D7 and D1
+    //; VMRS APSR_nzcv, FPSCR // Move the result of the comparison to APSR (Application Program Status Register)
 
 
 _PZ:
