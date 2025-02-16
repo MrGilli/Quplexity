@@ -3,7 +3,7 @@
 
 // I'm striving to make the code for Quplexity as readable as possible.
 // If you would like to contribute or contact me for any other reason please don't hesitate to email me: jacobygill@outlook.com
-// Or DM/friend request me on Discord: @bixel0
+// Or DM/friend request me on Discord: @mrgill0651
 
 .global _PX
 .global _PZ
@@ -17,42 +17,34 @@
 .global _CP
 .align 3
 
+sqrt2_inv:
+    .double 0.7071067811865475
 
 
 _PX:
-    // Define Pauli_X gate:
-    // [0.0, 1.0]
-    // [1.0, 0.0]
-    FMOV D1, #0.0
-    FMOV D2, #1.0
+    FMOV D1, #0.0           // D1 = 0.0; PX matrix number
+    FMOV D2, #1.0           // D2 = 1.0; PX matrix number
 
-    //Load supplied state vector values:
-    // e.g: [0]
-    //      [1]
 
-    LDR D5, [X0, #0]
-    LDR D6, [X0, #8]
+    LDR D5, [X0, #0]        // D5 = qubit vector 1;
+    LDR D6, [X0, #8]        // D6 = qubit vector 2;
 
     //Apply pauli_X given a state vector full of types: doubles/floats
-    //∣ψ′⟩=X∣ψ⟩=(01​10​)(αβ​)=(βα​)
-    //(0⋅α + 1⋅β
-    //1⋅α + 0⋅β​)=(βα​)
-
     //ROW 1
-    FMUL D7, D1, D5     //D7 = 0 * a
-    FMUL D8, D2, D6     //D8 = 1 * b
-    FADD D9, D7, D8     //D9 = D7 + D8
+    FMUL D7, D1, D5         // D7 = 0 * a
+    FMUL D8, D2, D6         // D8 = 1 * b
+    FADD D9, D7, D8         // D9 = D7 + D8
     //ROW 2
-    FMUL D10, D2, D5    //D10 = 1 * a
-    FMUL D11, D1, D6    //D11 = 0 * b
-    FADD D12, D11, D10  //D12 = D11 + D10
+    FMUL D10, D2, D5        // D10 = 1 * a
+    FMUL D11, D1, D6        // D11 = 0 * b
+    FADD D12, D11, D10      // D12 = D11 + D10
 
     //Output the new state of the qubit after
     //the Pauli-X gate has been applied
-    STR D9, [X0, #0]    //D9 = Output matrix [0]
-    STR D12, [X0, #8]   //D12 = Output matrix [1]
+    STR D9, [X0, #0]        // D9 = Output matrix [0]
+    STR D12, [X0, #8]       // D12 = Output matrix [1]
 
-    RET                 //Return to caller
+    RET                     // Return to caller
 
 //_pauli_Y:
     // Y = (0 -i ​i 0​)
@@ -60,8 +52,8 @@ _PX:
     //FMOV D1, #0.0
     //FMOV D2, #1.0
 
-    //LDR D3, [X0, #0]    // = a
-    //LDR D4, [X0, #8]    // = b
+    //LDR D3, [X0, #0]      // = a
+    //LDR D4, [X0, #8]      // = b
 
     // (0⋅α + -i⋅β
     //  (i)⋅α + 0⋅β​)=(α−β​)
@@ -77,38 +69,33 @@ _PZ:
     //Define Pauli_Z gate:
     // [1.0,  0.0]
     // [0.0, -1.0]
-    FMOV D1, #1.0   // D1 = 1.0
-    FMOV D2, #0.0   // D2 = 0.0
+    FMOV D1, #1.0           // D1 = 1.0; PZ matrix number
+    FMOV D2, #0.0           // D2 = 0.0; PZ matrix number
     // -1.0
-    FMOV D3, #1.0   // D3 = -1.0
-    FNEG D3, D3
+    FMOV D3, #1.0           // D3 = -1.0 PZ matrix number
+    FNEG D3, D3             // -1.0
 
     // Load vector numbers:
-    LDR D5, [X0, #0] // = a
-    LDR D6, [X0, #8] // = b
+    LDR D5, [X0, #0]        // D5 = qubit vector 1;
+    LDR D6, [X0, #8]        // D6 = qubit vector 2;
 
-    // (1⋅α + 0⋅β
-    //  0⋅α + (−1)⋅β​)=(α−β​)
     // ROW 1:
-    FMUL D7, D1, D5 //D7 = 1.0 * 0 = 0
-    FMUL D8, D2, D6 //D8 = 0.0 * 1.0 = 0
-    FADD D9, D7, D8 //D7 = 0 + 0 = 0
+    FMUL D7, D1, D5         //D7 = 1.0 * 0 = 0
+    FMUL D8, D2, D6         //D8 = 0.0 * 1.0 = 0
+    FADD D9, D7, D8         //D7 = 0 + 0 = 0
 
     //ROW 2:
-    FMUL D10, D2, D5 //D8 = 0.0 * 0.0 = 0
-    FMUL D11, D3, D6 //D9 = -1 * 1 = -1
-    FADD D12, D10, D11 //D10 = 0 + (-1) = -1
+    FMUL D10, D2, D5        //D8 = 0.0 * 0.0 = 0
+    FMUL D11, D3, D6        //D9 = -1 * 1 = -1
+    FADD D12, D10, D11      //D10 = 0 + (-1) = -1
 
-    STR D9, [X0, #0] // 0
-    STR D12, [X0, #8] // 0
+    STR D9, [X0, #0]        // Store resultant 
+    STR D12, [X0, #8]       // Store resultant
 
-    RET                 // Return to caller.
+    RET                     // Return to caller.
 
 _IM2x2:
     //Identity Matrix
-    // I=(1 0 ​0 1​)
-    //(a×1 + b×0, ​a×0 + b×1)
-    //(c×1 + d×0, c×0 + d×1​)
     FMOV D1, #0.0
     FMOV D2, #1.0
 
@@ -146,64 +133,67 @@ _IM2x2:
     RET
 
 _H:
-    LDR D1, [X0]
-    LDR D2, [X0, #8]
+    // Input: x0 -> pointer to qubit state
+    // Output: Applies Hadamard to qubit (q[0], q[1])
+    
+    LDP D0, D1, [x0]        // Load qubit (α_real, α_imag)
+    LDP D2, D3, [x0, #16]   // Load qubit (β_real, β_imag)
+    
+    FADD D4, D0, D2         // α_real + _real β
+    FADD D5, D1, D3         // α_imag + β_imag
 
-    FMOV D3, #1.0
-    FMOV D4, -1
+    FSUB D6, D0, D2         // _real - _real β
+    FSUB D7, D1, D3         // _imag - β_imag
 
-    //2x2 x Qubit:
-    //Row 1:
-    FMUL D5, D3, D1
-    FMUL D6, D3, D2
-    FADD D5, D5, D6
+    LDR D8, sqrt2_inv       // d8 = 1/sqrt(2)
 
-    //Row 2:
-    FMUL D6, D3, D1
-    FMUL D7, D4, D2
-    FADD D6, D6, D7
+    FMUL D4, D4, D8         // Scale by sqrt(2)
+    FMUL D5, D5, D8
+    FMUL D6, D6, D8         // Scale by sqrt(2)
+    FMUL D7, D7, D8
 
-    // [H] = 1/sqrt(2)
-    FMOV D7, #2.0
-    FSQRT D8, D7
-    FDIV D0, D3, D8
-
-    // Multiply each element of the 2x2 matrix by D0
-    FMUL D5, D0, D5
-    FMUL D6, D0, D6
-
-    STR D5, [X0, #0]
-    STR D6, [X0, #8]
+    STP D4, D5, [x0]        // Store resultant
+    STP D6, D7, [x0, #16]   // Store resultant
 
     RET
 
 _CNOT:
-    // Load QUBIT 1
-    LDR D1, [X0, #0]
-    LDR D2, [X0, #8]
+    // Load control qubit (qubit 1)
+    LDP D1, D2, [X0]        // Load real and imaginary parts of |0> component of control qubit
+    LDP D3, D4, [X0, #16]   // Load real and imaginary parts of |1> component of control qubit
 
-    // Load QUBIT 2
-    LDR D3, [X1, #0]
-    LDR D4, [X1, #8]
+    // Load target qubit (qubit 2)
+    LDP D5, D6, [X1]        // Load real and imaginary parts of |0> component of target qubit
+    LDP D7, D8, [X1, #16]   // Load real and imaginary parts of |1> component of target qubit
 
-    FMOV D5, #2.0
-    FMOV D6, #0.0
+    // Compute the new state for the target qubit:
+    // New |0> component of target qubit: (control |0> * target |0>) + (control |1> * target |1>)
+    // New |1> component of target qubit: (control |0> * target |1>) + (control |1> * target |0>)
 
-    // Normalize and check control qubit
-    FDIV D1, D1, D5
-    FCMP D1, D6
-    BNE ZERO            // If not in |1> state, skip
+    // Compute new |0> component (real and imaginary parts)
+    FMUL D9, D1, D5         // D9 = control |0> real * target |0> real
+    FMUL D10, D2, D6        // D10 = control |0> imag * target |0> imag
+    FADD D11, D9, D10       // D11 = new |0> real component
 
-    // Apply Pauli-X by swapping qubits
-    FMOV D9, D3         // Row 1: Copy D3 (qubit 3's value)
-    FMOV D3, D4         // Row 2: Swap D4 into D3
-    FMOV D4, D9         // Store D3's original value into D4
+    FMUL D12, D3, D7        // D12 = control |1> real * target |1> real
+    FMUL D13, D4, D8        // D13 = control |1> imag * target |1> imag
+    FADD D14, D12, D13      // D14 = new |0> imag component
 
-    // Store the swapped values back to the target qubit
-    STR D3, [X1, #0]
-    STR D4, [X1, #8]
+    // Compute new |1> component (real and imaginary parts)
+    FMUL D15, D1, D7        // D15 = control |0> real * target |1> real
+    FMUL D16, D2, D8        // D16 = control |0> imag * target |1> imag
+    FADD D17, D15, D16      // D17 = new |1> real component
 
-    RET
+    FMUL D18, D3, D5        // D18 = control |1> real * target |0> real
+    FMUL D19, D4, D6        // D19 = control |1> imag * target |0> imag
+    FADD D20, D18, D19      // D20 = new |1> imag component
+
+    // Store the updated target qubit values
+    STP D11, D14, [X1]      // Store new |0> component (real and imaginary)
+    STP D17, D20, [X1, #8]  // Store new |1> component (real and imaginary)
+
+    RET                     // Return to caller
+
 
 
 _CCNOT:
@@ -239,89 +229,88 @@ _CCNOT:
 
 _CZ:
     // Load QUBIT 1
-    LDR D1, [X0, #0]
-    LDR D2, [X0, #8]
+    LDR D1, [X0, #0]        // D1 = qubit1 vector 1;
+    LDR D2, [X0, #8]        // D2 = qubit1 vector 2;
 
     // Load QUBIT 2
-    LDR D3, [X1, #0]
-    LDR D4, [X1, #8]
+    LDR D3, [X1, #0]        // D3 = qubit1 vector 1;
+    LDR D4, [X1, #8]        // D4 = qubit1 vector 2;
 
-    FMOV D5, #2.0
-    FMOV D6, #0.0
+    FMOV D5, #2.0           // D5 = 2.0; CZ matrix number
+    FMOV D6, #0.0           // D6 = 0.0; CZ matrix number
 
     FDIV D1, D1, D5
     FCMP D1, D6
-    BNE ZERO
+    BNE ZERO                // IF D1 != 0; JUMP TO ZERO...
 
     //Apply Pauli-Z
-    FMOV D1, #1.0   // D1 = 1.0
-    FMOV D2, #0.0  // D2 = 0.0
+    FMOV D1, #1.0           // D1 = 1.0
+    FMOV D2, #0.0           // D2 = 0.0
     // -1.0
-    FMOV D3, #1.0   // D3 = -1.0
+    FMOV D3, #1.0           // D3 = -1.0
     FNEG D3, D3
 
-    // (1⋅α + 0⋅β
-    //  0⋅α + (−1)⋅β​)=(α−β​)
     // ROW 1:
-    FMUL D7, D1, D3 //D7 = 1.0 * 0 = 0
-    FMUL D8, D2, D4 //D8 = 0.0 * 1.0 = 0
-    FADD D9, D7, D8 //D7 = 0 + 0 = 0
+    FMUL D7, D1, D3         //D7 = 1.0 * 0 = 0
+    FMUL D8, D2, D4         //D8 = 0.0 * 1.0 = 0
+    FADD D9, D7, D8         //D7 = 0 + 0 = 0
 
     //ROW 2:
-    FMUL D10, D2, D3 //D8 = 0.0 * 0.0 = 0
-    FMUL D11, D3, D4 //D9 = -1 * 1 = -1
-    FADD D12, D10, D11 //D10 = 0 + (-1) = -1
+    FMUL D10, D2, D3        //D8 = 0.0 * 0.0 = 0
+    FMUL D11, D3, D4        //D9 = -1 * 1 = -1
+    FADD D12, D10, D11      //D10 = 0 + (-1) = -1
 
-    STR D9, [X1, #0] // 0
-    STR D12, [X1, #8] // 0
+    STR D9, [X1, #0]        // Store resultant
+    STR D12, [X1, #8]       // Store resultant
 
-    RET                 // Return to caller.
+    RET                     // Return to caller.
 
 _SWAP:
     // Load the two target qubits if the control qubit is 1
-    LDR D1, [X0, #0]    // Load the first element of target qubit 1 into D0
-    LDR D2, [X0, #8]    // Load the second element of target qubit 1 into D1
+    LDR D1, [X0, #0]        // Load the first element of target qubit 1 into D0
+    LDR D2, [X0, #8]        // Load the second element of target qubit 1 into D1
 
-    LDR D3, [X1, #0]    // Load the first element of target qubit 2 into D2
-    LDR D4, [X1, #8]    // Load the second element of target qubit 2 into D3
+    LDR D3, [X1, #0]        // Load the first element of target qubit 2 into D2
+    LDR D4, [X1, #8]        // Load the second element of target qubit 2 into D3
 
     // Perform the SWAP operation
-    STR D1, [X1, #0]    // Store the first element of qubit 1 into qubit 2
-    STR D2, [X1, #8]    // Store the second element of qubit 1 into qubit 2
+    STR D1, [X1, #0]        // Store the first element of qubit 1 into qubit 2
+    STR D2, [X1, #8]        // Store the second element of qubit 1 into qubit 2
 
-    STR D3, [X0, #0]    // Store the first element of qubit 2 into qubit 1
-    STR D4, [X0, #8]    // Store the second element of qubit 2 into qubit
+    STR D3, [X0, #0]        // Store the first element of qubit 2 into qubit 1
+    STR D4, [X0, #8]        // Store the second element of qubit 2 into qubit
 
     RET
 
 _FREDKIN:
     // Load the first element of the control qubit
-    LDR D0, [X0, #0]    // Control qubit value at X0
+    LDR D0, [X0, #0]        // Control qubit value at X0
 
-    FMOV D1, #0.0      // Set D1 to 0.0 for comparison
-    FCMP D1, D0         // Compare control qubit with 0.0
-    BNE PERFORM_SWAP    // If control qubit is |1⟩, perform swap
+    FMOV D1, #0.0           // Set D1 to 0.0 for comparison
+    FCMP D1, D0             // Compare control qubit with 0.0
+    BNE PERFORM_SWAP        // If control qubit is |1>, perform swap
 
-    RET                 // If control qubit is |0⟩, return without changes
+    RET                     // If control qubit is |0>, return without changes
 
 PERFORM_SWAP:
     // Load the two target qubits
-    LDR D1, [X1, #0]    // Target qubit 1 (qubit2[0])
-    LDR D2, [X1, #8]    // Target qubit 1 (qubit2[1])
+    LDR D1, [X1, #0]        // Target qubit 1 (qubit2[0])
+    LDR D2, [X1, #8]        // Target qubit 1 (qubit2[1])
 
-    LDR D3, [X2, #0]    // Target qubit 2 (qubit[0])
-    LDR D4, [X2, #8]    // Target qubit 2 (qubit[1])
+    LDR D3, [X2, #0]        // Target qubit 2 (qubit[0])
+    LDR D4, [X2, #8]        // Target qubit 2 (qubit[1])
 
     // Perform the swap
-    STR D1, [X2, #0]    // Store qubit2[0] into qubit[0]
-    STR D2, [X2, #8]    // Store qubit2[1] into qubit[1]
+    STR D1, [X2, #0]        // Store qubit2[0] into qubit[0]
+    STR D2, [X2, #8]        // Store qubit2[1] into qubit[1]
 
-    STR D3, [X1, #0]    // Store qubit[0] into qubit2[0]
-    STR D4, [X1, #8]    // Store qubit[1] into qubit2[1]
+    STR D3, [X1, #0]        // Store qubit[0] into qubit2[0]
+    STR D4, [X1, #8]        // Store qubit[1] into qubit2[1]
 
-    RET                 // Return to caller after performing swap
+    RET                     // Return to caller after performing swap
 
 _CP:
+    //The unit 'i' is approximated to pi/2
     // Load control qubit (qubit 1)
     LDR D1, [X0, #0]        // Load real part of qubit 1
     LDR D2, [X0, #8]        // Load imaginary part of qubit 1
@@ -341,10 +330,10 @@ _CP:
     FDIV D1, D1, D8
     FDIV D2, D2, D8
 
-    FCMP D1, D7              // Check if control qubit is in state |1⟩
-    BEQ ZERO                 // If control qubit is not |1⟩, skip phase application
+    FCMP D1, D7              // Check if control qubit is in state |1>
+    BEQ ZERO                 // If control qubit is not |1>, skip phase application
 
-    // Apply the phase shift if control qubit is |1⟩
+    // Apply the phase shift if control qubit is |1>
     // Multiply target qubit by the phase angle: e^(i*phase) = cos(phase) + i*sin(phase)
 
     // Real part of the target qubit after applying phase
@@ -361,7 +350,7 @@ _CP:
     STR D9, [X1, #0]        // Store the real part of qubit 2
     STR D10, [X1, #8]       // Store the imaginary part of qubit 2
 
-    RET                      // Return from function
+    RET                     // Return from function
 
 ZERO:
-    RET                      // Return if control qubit is not in state |1⟩
+    RET                     // Return if control qubit is not in state |1>
