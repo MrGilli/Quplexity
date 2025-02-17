@@ -5,6 +5,7 @@
 //; If you would like to contribute or contact me for any other reason please don't hesitate to email me: jacobygill@outlook.com
 //; Or DM/friend request me on Discord: @mrgill0651
 
+.global _QuantumCircuit
 .global _PX
 .global _PZ
 .global _IM2x2
@@ -21,6 +22,33 @@ sqrt2_inv:
     .double 0.7071067811865475
 
 
+_QuantumCircuit:
+    // Input: x0 = num_of_qubits, x1 = pointer to qubits array
+    // Each qubit has 4 double values (a_real, a_imag, b_real, b_imag)
+    
+    mov x2, #0              // Initialize loop counter (qubit index)
+    lsl x3, x0, #5          // x3 = num_of_qubits * 32 (each qubit is 4 doubles = 32 bytes)
+
+    fmov d0, 1.0            // Load 1.0 into d0 (a_real)
+    fmov d1, 0.0            // Load 0.0 into d1 (a_imag)
+    fmov d2, 0.0            // Load 0.0 into d2 (b_real)
+    fmov d3, 0.0            // Load 0.0 into d3 (b_imag)
+
+init_loop:
+    cmp x2, x3              // Compare index with end
+    bge done                // If x2 >= num_of_qubits * 32, exit
+
+    add x4, x1, x2          // x4 = qubits + x2
+    stp d0, d1, [x4], #16   // Store (1.0, 0.0)
+    stp d2, d3, [x4], #16   // Store (0.0, 0.0)
+
+    add x2, x2, #32         // Move to next qubit (4 doubles = 32 bytes)
+    b init_loop             // Repeat
+
+done:
+    ret
+
+
 _PX:
     FMOV D1, #0.0           //; D1 = 0.0; PX matrix number
     FMOV D2, #1.0           //; D2 = 1.0; PX matrix number
@@ -29,38 +57,40 @@ _PX:
     LDR D5, [X0, #0]        //; D5 = qubit vector 1;
     LDR D6, [X0, #8]        //; D6 = qubit vector 2;
 
-    //; Apply pauli_X given a state vector full of types: doubles/floats
-    //; ROW 1
+    //Apply pauli_X given a state vector full of types: doubles/floats
+    //ROW 1
     FMUL D7, D1, D5         //; D7 = 0 * a
     FMUL D8, D2, D6         //; D8 = 1 * b
     FADD D9, D7, D8         //; D9 = D7 + D8
-    //; ROW 2
+    //ROW 2
     FMUL D10, D2, D5        //; D10 = 1 * a
     FMUL D11, D1, D6        //; D11 = 0 * b
     FADD D12, D11, D10      //; D12 = D11 + D10
 
-    //; Output the new state of the qubit after
-    //; the Pauli-X gate has been applied
+    //Output the new state of the qubit after
+    //the Pauli-X gate has been applied
     STR D9, [X0, #0]        //; D9 = Output matrix [0]
     STR D12, [X0, #8]       //; D12 = Output matrix [1]
 
     RET                     //; Return to caller
 
-//; _pauli_Y:
-    //;  Y = (0 -i ​i 0​)
-    //;  Define pauli_Y gate
-    //; FMOV D1, #0.0
-    //; FMOV D2, #1.0
+//_pauli_Y:
+    // Y = (0 -i ​i 0​)
+    // Define pauli_Y gate
+    //FMOV D1, #0.0
+    //FMOV D2, #1.0
 
-    //; LDR D3, [X0, #0]      // = a
-    //; LDR D4, [X0, #8]      // = b
+    //LDR D3, [X0, #0]      // = a
+    //LDR D4, [X0, #8]      // = b
 
-    //; ROW 1
-    //; FMUL D5, D1, D2
-    //; FMUL D6, D2, D4
-    //; FADD D7, D5, D6
-    //; VCMPE.D64 D7, D1      // Compare double-precision floating-point values in D7 and D1
-    //; VMRS APSR_nzcv, FPSCR // Move the result of the comparison to APSR (Application Program Status Register)
+    // (0⋅α + -i⋅β
+    //  (i)⋅α + 0⋅β​)=(α−β​)
+    // ROW 1
+    //FMUL D5, D1, D2
+    //FMUL D6, D2, D4
+    //FADD D7, D5, D6
+    //VCMPE.D64 D7, D1      // Compare double-precision floating-point values in D7 and D1
+    //VMRS APSR_nzcv, FPSCR // Move the result of the comparison to APSR (Application Program Status Register)
 
 
 _PZ:
@@ -129,66 +159,62 @@ _IM2x2:
     RET
 
 _H:
-    //; Input: x0 -> pointer to qubit state
-    //; Output: Applies Hadamard to qubit (q[0], q[1])
+    // Input: x0 = qubit index, x1 = pointer to qubits array
+    // Each qubit consists of 4 doubles (32 bytes)
     
-    LDP D0, D1, [x0]        //; Load qubit (α_real, α_imag)
-    LDP D2, D3, [x0, #16]   //; Load qubit (β_real, β_imag)
-    
-    FADD D4, D0, D2         //; _real + _real β
-    FADD D5, D1, D3         //; _imag + β_imag
+    LSL x2, x0, #5          // x2 = qubit_index * 32 (offset in bytes)
+    ADD x3, x1, x2          // x3 = address of target qubit
 
-    FSUB D6, D0, D2         //; _real - _real β
-    FSUB D7, D1, D3         //; _imag - β_imag
+    LDP D0, D1, [x3]        // Load qubit (a_real, a_imag)
+    LDP D2, D3, [x3, #16]   // Load qubit (b_real, b_imag)
 
-    LDR D8, sqrt2_inv       //; d8 = 1/sqrt(2)
+    FADD D4, D0, D2         // (a_real + b_real)
+    FADD D5, D1, D3         // (a_imag + b_imag)
+    FSUB D6, D0, D2         // (a_real - b_real)
+    FSUB D7, D1, D3         // (a_imag - b_imag)
 
-    FMUL D4, D4, D8         //; Scale by sqrt(2)
+    LDR D8, sqrt2_inv       // d8 = 1/sqrt(2)
+
+    FMUL D4, D4, D8         // Scale by sqrt(2)
     FMUL D5, D5, D8
-    FMUL D6, D6, D8         //; Scale by sqrt(2)
+    FMUL D6, D6, D8
     FMUL D7, D7, D8
 
-    STP D4, D5, [x0]        //; Store resultant
-    STP D6, D7, [x0, #16]   //; Store resultant
+    STP D4, D5, [x3]        // Store updated (a_real, a_imag)
+    STP D6, D7, [x3, #16]   // Store updated (b_real, b_imag)
 
     RET
 
+
 _CNOT:
-    //; Load control qubit (qubit 1)
-    LDP D1, D2, [X0]        //; Load real and imaginary parts of |0> component of control qubit
-    LDP D3, D4, [X0, #16]   //; Load real and imaginary parts of |1> component of control qubit
+    // Calculate the byte offset for the control qubit (each qubit has 4 doubles = 32 bytes)
+    MOV X3, X0          // control_index
+    LSL X3, X3, #5      // Multiply by 32 (since each qubit has 4 doubles, each double is 8 bytes)
 
-    //; Load target qubit (qubit 2)
-    LDP D5, D6, [X1]        //; Load real and imaginary parts of |0> component of target qubit
-    LDP D7, D8, [X1, #16]   //; Load real and imaginary parts of |1> component of target qubit
+    // Calculate the byte offset for the target qubit
+    MOV X4, X1          // target_index
+    LSL X4, X4, #5      // Multiply by 32 (since each qubit has 4 doubles)
 
-    //; Compute the new state for the target qubit:
-    //; New |0> component of target qubit: (control |0> * target |0>) + (control |1> * target |1>)
-    //; New |1> component of target qubit: (control |0> * target |1>) + (control |1> * target |0>)
+    // Get the addresses of the control and target qubits
+    ADD X3, X3, X2      // x3 = address of control qubit (pointer to qubits array)
+    ADD X4, X4, X2      // x4 = address of target qubit
 
-    //; Compute new |0> component (real and imaginary parts)
-    FMUL D9, D1, D5         //; D9 = control |0> real * target |0> real
-    FMUL D10, D2, D6        //; D10 = control |0> imag * target |0> imag
-    FADD D11, D9, D10       //; D11 = new |0> real component
+    // Load the real part (a_real) of the control qubit
+    LDR D0, [X3]        // Load a_real of control qubit into d0
 
-    FMUL D12, D3, D7        //; D12 = control |1> real * target |1> real
-    FMUL D13, D4, D8        //; D13 = control |1> imag * target |1> imag
-    FADD D14, D12, D13      //; D14 = new |0> imag component
+    // Compare if the real part of the control qubit is 0
+    FCMP D0, #0.0       // If d0 (a_real) == 0, no action; if d0 != 0, proceed to swap
+    BEQ ZERO     // If control qubit's real part is zero, go to ZERO
 
-    //; Compute new |1> component (real and imaginary parts)
-    FMUL D15, D1, D7        //; D15 = control |0> real * target |1> real
-    FMUL D16, D2, D8        //; D16 = control |0> imag * target |1> imag
-    FADD D17, D15, D16      //; D17 = new |1> real component
+    // Swap the a_real values of control and target qubits
+    LDR D1, [X3]        // Load a_real of target qubit into d1
+    STR D1, [X4]    // Store a_real into b_real of target qubit
 
-    FMUL D18, D3, D5        //; D18 = control |1> real * target |0> real
-    FMUL D19, D4, D6        //; D19 = control |1> imag * target |0> imag
-    FADD D20, D18, D19      //; D20 = new |1> imag component
+    LDR D3, [X3, #16]    // Load a_imag of target qubit into d1
+    STR D3, [X4, #16]   // Store a_imag into b_imag of target qubit
 
-    //; Store the updated target qubit values
-    STP D11, D14, [X1]      //; Store new |0> component (real and imaginary)
-    STP D17, D20, [X1, #8]  //; Store new |1> component (real and imaginary)
 
-    RET                     //; Return to caller
+    RET
 
 
 
