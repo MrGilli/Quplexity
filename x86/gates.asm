@@ -5,24 +5,22 @@
 ; If you would like to contribute or contact me for any other reason please don't hesitate to email me: jacobygill@outlook.com
 ; Or DM/friend request me on Discord: @bixel0
 
-
 section .data
- align 16
+  align 16
   sqrt2_inv dq 0.7071067811865475, 0.7071067811865475  ; 1/sqrt(2)
- align 16
+  align 16
   one_state dq 0.0, 1.0
- align 16 
-  const dq 1.0, -1.0
- align 16
-  negOne_one dq -1.0, 1.0
- align 16
-  const_negOne dq -1.0, -1.0
+  align 16 
+  const dq 1.0, -1.0   ; For Pauli-Z and controlled-Z gates (flip the second component)
+  align 16
+  neg_imag dq 0.0, -1.0, 1.0, 0.0   ; For multiplying by -i and i in Pauli-Y gate
+  one dq 1.0
+  zero dq 0.0
 
 section .text
+  global _QuantumCircuit
   global _PX
-  global _PX_basic
   global _PZ
-  global _PZ_basic
   global _PY
   global _H
   global _H_basic
@@ -30,149 +28,149 @@ section .text
   global _CCNOT
   global _CZ
 
+
+_QuantumCircuit:
+  xor rdx, rdx                  ; rdx = loop counter (qubit index)
+  shl rdi, 5                    ; rdi = num_of_qubits * 32 (each qubit is 4 doubles = 32 bytes)
+
+  movq xmm0, qword [one]        ; Load 1.0 into xmm0 (a_real)
+  movq xmm1, qword [zero]       ; Load 0.0 into xmm1 (a_imag)
+  movq xmm2, qword [zero]       ; Load 0.0 into xmm2 (b_real)
+  movq xmm3, qword [zero]       ; Load 0.0 into xmm3 (b_imag)
+
+init_loop:
+  cmp rdx, rdi                  ; Compare index with end
+  jge done                      ; If rdx >= num_of_qubits * 32, exit
+
+  lea rax, [rsi + rdx]          ; rax = qubits + rdx
+  movaps [rax], xmm0            ; Store (1.0, 0.0)
+  movaps [rax + 16], xmm2       ; Store (0.0, 0.0)
+
+  add rdx, 32                   ; Move to next qubit (4 doubles = 32 bytes)
+  jmp init_loop                 ; Repeat
+
+done:
+  ret
+
 _PX:
-  MOVAPD XMM0, [RDI]       ; XMM0 = (alpha_real, alpha_imag)
-  MOVAPD XMM1, [RDI + 16]  ; XMM1 = (beta_real, beta_imag)
-  ; Applying Pauli-X Quantum Gate
-  MOVAPD [RDI], XMM1
-  MOVAPD [RDI+16], XMM0
-  RET
-
-_PX_basic:
   ; Pauli-X Quantum Gate
-  ; Load qubit
-  MOVAPD XMM0, [RDI]       ; The "high" half of XMM0 contains qubit[0], the "low" half contains qubit[1]
-
-  ; Perform Pauli-X operation (swapping elements)
-  ; qubit[0] = qubit[1], qubit[1] = qubit[0]
-  SHUFPD XMM0, XMM0, 01b
-  MOVAPD [RDI], XMM0        ; Store qubit[0] into XMM1
-
+  MOVAPD XMM0, [RDI]            ; Load qubit
+  SHUFPD XMM0, XMM0, 01b        ; Swap qubit[0] and qubit[1]
+  MOVAPD [RDI], XMM0            ; Store the swapped qubit back
   RET
 
 _PZ:
-  MOVAPD XMM0, [RDI+16] ; XMM1 = (beta_real, beta_imag) 
-  MULPD XMM0, [const_negOne]; Applying Pauli-Z
-  MOVAPD [RDI+16], XMM0
-  RET
-
-_PZ_basic:
   ; Pauli-Z Quantum Gate
-  ; Load qubit
-  MOVAPD XMM0, [RDI]       ; The "high" half of XMM0 contains qubit[0], the "low" half contains qubit[1]
-
-  ; Pauli-Z matrix elements
-  ; [ 1.0,  0.0 ] * [ a ]
-  ; [ 0.0, -1.0 ] * [ b ]
-
-  MULPD XMM0, [const]
-  MOVAPD [RDI], XMM0
-
+  MOVAPD XMM0, [RDI]            ; Load qubit
+  MULPD XMM0, [const]           ; Apply Pauli-Z gate (flip the phase of qubit[1])
+  MOVAPD [RDI], XMM0            ; Store result back to qubit
   RET
 
 _PY:
-  MOVAPD XMM0, [RDI]       ; XMM0 = (α_real, α_imag)
-  MOVAPD XMM1, [RDI + 16]  ; XMM1 = (β_real, β_imag)
-
-  SHUFPD XMM1, XMM1, 01b
-  MULPD  XMM1, [const] 
-
-  SHUFPD XMM0, XMM0, 01b 
-  MULPD  XMM0, [negOne_one]
-
-  MOVAPD [RDI], XMM1
-  MOVAPD [RDI + 16], XMM0
-
+  ; Pauli-Y Quantum Gate
+  MOVAPD XMM0, [RDI]            ; Load qubit
+  MOVAPD XMM1, [RDI + 16]       ; Get second part of the qubit
+  SHUFPD XMM2, XMM1, 01b        ; Flip to work on the imaginary part
+  MULPD XMM2, [neg_imag]        ; Multiply by -i
+  SHUFPD XMM3, XMM0, 01b        ; Flip real to imaginary part
+  MULPD XMM3, [neg_imag]        ; Multiply by i
+  MOVAPD [RDI], XMM2            ; Store the real part
+  MOVAPD [RDI + 16], XMM3       ; Store the imaginary part
   RET
 
 _H:
-  MOVAPD XMM0, [RDI]       ; XMM0 = (alphaα_real, α_imag)
-  MOVAPD XMM1, [RDI + 16]  ; XMM1 = (betaβ_real, β_imag)
+  SHL RDI, 5                    ; rdi = qubit_index * 32 (offset in bytes)
+  ADD RDI, RSI                  ; rdi = address of target qubit (qubits + offset)
 
-  MOVAPD XMM2, XMM0
-  ADDPD XMM2, XMM1
+  MOVQ XMM0, qword [rdi]        ; Load a_real
+  MOVQ XMM1, qword [rdi+8]      ; Load a_imag
+  MOVQ XMM2, qword [rdi+16]     ; Load b_real
+  MOVQ XMM3, qword [rdi+24]     ; Load b_imag
 
-  SUBPD XMM0, XMM1   
+  ADDPD XMM0, XMM2              ; (a_real + b_real), (a_imag + b_imag)
+  ADDPD XMM2, XMM0              ; (a_real - b_real), (a_imag - b_imag)
 
-  ; Scale both results by 1/sqrt(2)
-  MULPD XMM2, [sqrt2_inv]
-  MULPD XMM0, [sqrt2_inv]
+  MOVQ XMM4, qword [sqrt2_inv]
+  MULPD XMM0, XMM4           
+  MULPD XMM2, XMM4           
 
-  MOVAPD [RDI], XMM2       
-  MOVAPD [RDI + 16], XMM0
+  MOVQ qword [rdi], XMM0        ; Store updated 
+  MOVQ qword [rdi+8], XMM1   
+  MOVQ qword [rdi+16], XMM2  
+  MOVQ qword [rdi+24], XMM3
 
   RET
 
 _H_basic:
-  MOVAPD XMM0, [RDI]       ; xmm0 = [ q[0], q[1] ]
-  
+  ; Basic Hadamard gate: applies the Hadamard operation on the input qubit
+  MOVAPD XMM0, [RDI]            ; Load qubit (q[0], q[1])
   MOVAPD XMM1, XMM0
-  MULPD XMM1, [const] ; xmm1 = [ q[0], -q[1] ]
-  HADDPD XMM0, XMM1; xmm0 = [ q[0] + q[1], q[0] - q[1] ]
-  MULPD XMM0, [sqrt2_inv]
-  MOVAPD [RDI], XMM0
-
+  MULPD XMM1, [const]           ; XMM1 = [q[0], -q[1]]
+  HADDPD XMM0, XMM1             ; XMM0 = [q[0] + q[1], q[0] - q[1]]
+  MULPD XMM0, [sqrt2_inv]       ; Scale by 1/sqrt(2)
+  MOVAPD [RDI], XMM0            ; Store back to qubit
   RET
 
-
 _CNOT:
-  MOVAPD XMM0, [RDI]       ; Load control qubit (ca[0], cb[1])
-  MOVAPD XMM1, [RSI]       ; Load target qubit (ta[0], tb[1])
+  SHL RDI, 5                    ; rdi = control_index * 32 (offset in bytes)
+  ADD RDI, RDX                  ; rdi = address of control qubit (qubits + offset)
 
-  MOVAPD XMM2, XMM0        ; Copy control qubit to XMM2
-  MULPD XMM2, XMM1         ; Multiply control qubit with target qubit (element-wise)
+  MOVAPD XMM0, [RDI]            ; control qubit (ca[0], cb[1])
+  ;MOVAPD XMM1, [RDI + 16]      ; target qubit (ta[0], tb[1])
+
+
+  UCOMISS XMM0, [one_state]     ; compare control qubit 1 with |1>
+  JE retcn
+
+  SHL RSI, 5                    ; rdi = control_index * 32 (offset in bytes)
+  ADD RSI, RDX                  ; rdi = address of control qubit (qubits + offset)
+ 
+
+  MOVQ XMM0, qword [RDI]        ; Load a_real
+  MOVQ XMM1, qword [RDI+8]      ; Load a_imag
+  MOVQ XMM2, qword [RDI+16]     ; Load b_real
+  MOVQ XMM3, qword [RDI+24]     ; Load b_imag      
   
-  MOVAPD XMM3, XMM0        ; Copy control qubit again
-  MULPD XMM3, [one_state]  ; Multiply with |1> state to extract amplitude of |1⟩
 
-  PTEST XMM3, XMM3         ; If control qubit has no amplitude in |1>, skip swap
-  JZ ret
+  MOVQ qword [RSI], XMM0        ; Store updated 
+  MOVQ qword [RSI+8], XMM1   
+  MOVQ qword [RSI+16], XMM2  
+  MOVQ qword [RSI+24], XMM3
 
-  SHUFPD XMM1, XMM1, 01b   ; Swap target qubit amplitudes (Pauli-X)
-  MOVAPD [RSI], XMM1
+retcn: RET
 
-ret: RET
 
 
 _CCNOT:
-  ; Load control qubit 1
-  MOVAPD XMM0, [RDI]
-  CMPPD XMM0, [one_state], 0; testing for equality
-  PTEST XMM0, XMM0; if not equal -> XMM0 = 0x0000... 
-  JZ retcc
+  ; Controlled-Controlled-NOT Gate (Toffoli gate)
+  MOVAPD XMM0, [RDI]            ; Load control qubit 1
+  CMPPD XMM0, [one_state], 0    ; Compare control qubit 1 with |1>
+  PTEST XMM0, XMM0              ; Test if zero
+  JZ retcc                      ; If not |1>, return
 
-  ; Load control qubit 2
-  MOVAPD XMM0, [RSI]
-  CMPPD XMM0, [one_state], 0
-  PTEST XMM0, XMM0
-  JZ retcc
+  MOVAPD XMM0, [RSI]            ; Load control qubit 2
+  CMPPD XMM0, [one_state], 0    ; Compare control qubit 2 with |1>
+  PTEST XMM0, XMM0              ; Test if zero
+  JZ retcc                      ; If not |1>, return
 
-  ; Both control qubits are in |1⟩ state, apply Pauli-X (flip) to qubit 3
-  ; Load qubit 3 (target qubit)
-  MOVAPD XMM0, [RDX]
-
-  ; Pauli-X gate: swap the values of qubit 3 (target qubit)
-  SHUFPD XMM0, XMM0, 01b  
-
-  ; Store the flipped values back to the target qubit memory
-  MOVAPD [RDX], XMM0 
-
-retcc:  RET
+  MOVAPD XMM0, [RDX]            ; Load target qubit
+  SHUFPD XMM0, XMM0, 01b        ; Swap target qubit
+  MOVAPD [RDX], XMM0            ; Store flipped target qubit back
+retcc:
+  RET
 
 _CZ:
-  ; Load control qubit
-  MOVAPD XMM0, [RDI]
-  CMPPD XMM0, [one_state], 0; testing for equality
-  PTEST XMM0, XMM0; if not equal -> XMM0 = 0x0000...
-  JZ retz
+  ; Controlled-Z Gate
+  MOVAPD XMM0, [RDI]            ; Load control qubit
+  CMPPD XMM0, [one_state], 0    ; Compare control qubit with |1>
+  PTEST XMM0, XMM0              ; Test if zero
+  JZ retz                       ; If not |1>, return
 
-  ; Load target qubit - since the control is |1> we apply Pauli Z
-  MOVAPD XMM0, [RSI]
-  MULPD XMM0, [const]
-  MOVAPD [RSI], XMM0
-
-retz:  RET
-
+  MOVAPD XMM0, [RSI]            ; Load target qubit
+  MULPD XMM0, [const]           ; Apply Pauli-Z gate (flip the phase of qubit[1])
+  MOVAPD [RSI], XMM0            ; Store updated target qubit back
+retz:
+  RET
 
 ZERO:
   ; No change to target qubit if control qubits are not both in |1⟩ state
