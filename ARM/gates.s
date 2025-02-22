@@ -22,31 +22,33 @@ sqrt2_inv:
     .double 0.7071067811865475
 
 
-_QuantumCircuit:
-    // Input: x0 = num_of_qubits, x1 = pointer to qubits array
-    // Each qubit has 4 double values (a_real, a_imag, b_real, b_imag)
-    
-    mov x2, #0              // Initialize loop counter (qubit index)
-    lsl x3, x0, #5          // x3 = num_of_qubits * 32 (each qubit is 4 doubles = 32 bytes)
 
-    fmov d0, 1.0            // Load 1.0 into d0 (a_real)
-    fmov d1, 0.0            // Load 0.0 into d1 (a_imag)
-    fmov d2, 0.0            // Load 0.0 into d2 (b_real)
-    fmov d3, 0.0            // Load 0.0 into d3 (b_imag)
+_QuantumCircuit:
+    // Input: x0 = num_qubits, x1 = pointer to statevector array (complex numbers)
+    // Each amplitude has (real, imag), so 2 * (2^num_qubits) doubles.
+
+    mov x2, #0              // Loop counter (index in statevector)
+    mov x3, #8              // 2^2 = 4 complex numbers, 4 * 2 = 8 doubles
+
+    fmov d0, 1.0            // Load 1.0 (real part of |00⟩)
+    fmov d1, 0.0            // Load 0.0 (imag part of |00⟩)
 
 init_loop:
-    cmp x2, x3              // Compare index with end
-    bge done                // If x2 >= num_of_qubits * 32, exit
+    cmp x2, x3              // Compare with total statevector size
+    bge done                // If x2 >= 8, exit
 
-    add x4, x1, x2          // x4 = qubits + x2
-    stp d0, d1, [x4], #16   // Store (1.0, 0.0)
-    stp d2, d3, [x4], #16   // Store (0.0, 0.0)
+    add x4, x1, x2, lsl #3  // Get address of statevector[x2]
+    stp d0, d1, [x4]        // Store real and imag
 
-    add x2, x2, #32         // Move to next qubit (4 doubles = 32 bytes)
-    b init_loop             // Repeat
+    fmov d0, 0.0            // Set next state to 0 + 0i
+    fmov d1, 0.0
+
+    add x2, x2, #2          // Move to next complex number (2 doubles per complex)
+    b init_loop
 
 done:
     ret
+    
 
 
 _PX:
@@ -159,31 +161,48 @@ _IM2x2:
     RET
 
 _H:
-    // Input: x0 = qubit index, x1 = pointer to qubits array
-    // Each qubit consists of 4 doubles (32 bytes)
+    adr x2, sqrt2_inv
+    ldr d2, [x2]            // Load 1/sqrt(2)
+
+    mov x3, #0              // Loop counter
+    mov x5, #4              // Number of states (2^2 = 4)
+
+    mov x4, #1              // Compute stride: 1 << qubit_index
+    lsl x4, x4, x0
+
+apply_hadamard:
+    cmp x3, x5              // Stop when we reach the end
+    bge done_hadamard
+
+    tst x3, x4              // Check if the qubit_index bit is set
+    bne skip_hadamard       // Skip if it's the second element in a pair
+
+    add x6, x1, x3, lsl #4  // Get address of statevector[x3]
+    add x7, x6, x4, lsl #4  // Get paired statevector address
+
+    ldp d0, d1, [x6]        // Load real & imag of |x⟩
+    ldp d3, d4, [x7]        // Load real & imag of |x ⊕ 2^qubit_index⟩
+
+    fadd d5, d0, d3         // (a + b)
+    fsub d6, d0, d3         // (a - b)
+    fadd d7, d1, d4         // (c + d)
+    fsub d8, d1, d4         // (c - d)
+
+    fmul d5, d5, d2         // Normalize (a + b) / sqrt(2)
+    fmul d6, d6, d2         // Normalize (a - b) / sqrt(2)
+    fmul d7, d7, d2         // Normalize (c + d) / sqrt(2)
+    fmul d8, d8, d2         // Normalize (c - d) / sqrt(2)
+
+    stp d5, d7, [x6]        // Store new (real, imag)
+    stp d6, d8, [x7]        // Store new (real, imag)
+
+skip_hadamard:
+    add x3, x3, #1          // Move to next state index
+    b apply_hadamard
+
+done_hadamard:
+    ret
     
-    LSL x2, x0, #5          // x2 = qubit_index * 32 (offset in bytes)
-    ADD x3, x1, x2          // x3 = address of target qubit
-
-    LDP D0, D1, [x3]        // Load qubit (a_real, a_imag)
-    LDP D2, D3, [x3, #16]   // Load qubit (b_real, b_imag)
-
-    FADD D4, D0, D2         // (a_real + b_real)
-    FADD D5, D1, D3         // (a_imag + b_imag)
-    FSUB D6, D0, D2         // (a_real - b_real)
-    FSUB D7, D1, D3         // (a_imag - b_imag)
-
-    LDR D8, sqrt2_inv       // d8 = 1/sqrt(2)
-
-    FMUL D4, D4, D8         // Scale by sqrt(2)
-    FMUL D5, D5, D8
-    FMUL D6, D6, D8
-    FMUL D7, D7, D8
-
-    STP D4, D5, [x3]        // Store updated (a_real, a_imag)
-    STP D6, D7, [x3, #16]   // Store updated (b_real, b_imag)
-
-    RET
 
 
 _CNOT:
