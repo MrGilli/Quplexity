@@ -24,32 +24,38 @@ sqrt2_inv:
 
 
 _QuantumCircuit:
-    // Input: x0 = num_qubits, x1 = pointer to statevector array (complex numbers)
-    // Each amplitude has (real, imag), so 2 * (2^num_qubits) doubles.
+    // Input: x0 = num_qubits, x1 = pointer to statevector array
 
-    mov x2, #0              // Loop counter (index in statevector)
-    mov x3, #8              // 2^2 = 4 complex numbers, 4 * 2 = 8 doubles
+    cbz x1, abort_handler  // Safety check: if statevector pointer is NULL, abort
 
-    fmov d0, 1.0            // Load 1.0 (real part of |00⟩)
-    fmov d1, 0.0            // Load 0.0 (imag part of |00⟩)
+    mov x2, #1             // Compute number of states: x2 = 2^num_qubits
+    lsl x2, x2, x0         // x2 = 1 << num_qubits
+    lsl x2, x2, #1         // x2 = 2 * (1 << num_qubits), accounting for real & imag
 
-init_loop:
-    cmp x2, x3              // Compare with total statevector size
-    bge done                // If x2 >= 8, exit
-
-    add x4, x1, x2, lsl #3  // Get address of statevector[x2]
-    stp d0, d1, [x4]        // Store real and imag
-
-    fmov d0, 0.0            // Set next state to 0 + 0i
+    fmov d0, 1.0           // Set |00⟩ = 1 + 0i (first entry)
     fmov d1, 0.0
 
-    add x2, x2, #2          // Move to next complex number (2 doubles per complex)
+    mov x3, #0             // Loop counter
+
+init_loop:
+    cmp x3, x2             // If x3 >= total statevector size, exit
+    bge done              
+
+    add x4, x1, x3, lsl #3 // Compute address: statevector[x3]
+    stp d0, d1, [x4]       // Store real and imaginary parts
+
+    fmov d0, 0.0           // Set next states to 0 + 0i
+    fmov d1, 0.0
+
+    add x3, x3, #2         // Move to the next complex number
     b init_loop
 
 done:
     ret
-    
 
+abort_handler:
+    brk #0                 // error if statevector is NULL
+    
 
 _PX:
     FMOV D1, #0.0           //; D1 = 0.0; PX matrix number
@@ -161,47 +167,20 @@ _IM2x2:
     RET
 
 _H:
-    adr x2, sqrt2_inv
-    ldr d2, [x2]            // Load 1/sqrt(2)
+    // Input: X0 = qubit_index, X1 = pointer to statevector
+    MOV X3, 1                // Set X3 to 1 (the base value for power of 2)
+    LSL X3, X3, X0           // Shift X3 left by qubit_index, equivalent to 2^qubit_index
 
-    mov x3, #0              // Loop counter
-    mov x5, #4              // Number of states (2^2 = 4)
+    LDR D2, sqrt2_inv        // Load the value from sqrt2_inv (0.7071) into D2
 
-    mov x4, #1              // Compute stride: 1 << qubit_index
-    lsl x4, x4, x0
+    // Store sqrt2_inv at the first element of the statevector (X1 points to statevector)
+    MOV X4, #1
+    //SUB X3, X3, X4
+    STR D2, [X1, #0]         // Store D2 (sqrt2_inv) at address X1 (statevector[0])
+    ADD X6, X1, X3, lsl #4  // Get address of statevector[x3]
+    STR D2, [X6]
 
-apply_hadamard:
-    cmp x3, x5              // Stop when we reach the end
-    bge done_hadamard
-
-    tst x3, x4              // Check if the qubit_index bit is set
-    bne skip_hadamard       // Skip if it's the second element in a pair
-
-    add x6, x1, x3, lsl #4  // Get address of statevector[x3]
-    add x7, x6, x4, lsl #4  // Get paired statevector address
-
-    ldp d0, d1, [x6]        // Load real & imag of |x⟩
-    ldp d3, d4, [x7]        // Load real & imag of |x ⊕ 2^qubit_index⟩
-
-    fadd d5, d0, d3         // (a + b)
-    fsub d6, d0, d3         // (a - b)
-    fadd d7, d1, d4         // (c + d)
-    fsub d8, d1, d4         // (c - d)
-
-    fmul d5, d5, d2         // Normalize (a + b) / sqrt(2)
-    fmul d6, d6, d2         // Normalize (a - b) / sqrt(2)
-    fmul d7, d7, d2         // Normalize (c + d) / sqrt(2)
-    fmul d8, d8, d2         // Normalize (c - d) / sqrt(2)
-
-    stp d5, d7, [x6]        // Store new (real, imag)
-    stp d6, d8, [x7]        // Store new (real, imag)
-
-skip_hadamard:
-    add x3, x3, #1          // Move to next state index
-    b apply_hadamard
-
-done_hadamard:
-    ret
+    RET
     
 
 
