@@ -3,7 +3,8 @@
 ![OS](https://img.shields.io/badge/os-Linux-9cbd3c.svg)
 ![OS](https://img.shields.io/badge/os-Windows-9cbd3c.svg)
 
-# Quplexity
+# Quplex![Quplexity](https://github.com/user-attachments/assets/0727a094-8ba3-4126-b147-6610157cfb2a)
+ity
 
 Quplexity is a blazingly fast and lightweight (modular) library that provides Quantum Computer simulators with their mathematical and essential quantum logic gates or functions. Quplexity is written in x86 and ARM64(Aarch64) Assembly for fast execution and computational times. The library can significantly enhance the speed of Quantum Computer simulators, as a result of this, more complex algorithms and sequences can be simulated in an efficient yet accurate manner. Quplexity has exstensive and carefully crafted documentation, to help anyone no matter what their technological fluency is, to integrate Quplexity into their project or contribute to the project itself.
 
