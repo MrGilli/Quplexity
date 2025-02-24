@@ -7,17 +7,27 @@
 
 Quplexity is a blazingly fast and lightweight (modular) library that provides Quantum Computer simulators with their mathematical and essential quantum logic gates or functions. Quplexity is written in x86 and ARM64(Aarch64) Assembly for fast execution and computational times. The library can significantly enhance the speed of Quantum Computer simulators, as a result of this, more complex algorithms and sequences can be simulated in an efficient yet accurate manner. Quplexity has exstensive and carefully crafted documentation, to help anyone no matter what their technological fluency is, to integrate Quplexity into their project or contribute to the project itself.
 
+## 📌 Features
+- **Optimized for Performance**: Written in low-level Assembly for maximum efficiency.
+- **Cross-Architecture Support**: Supports both x86 and ARM64 architectures.
+- **Modular Design**: Easily extendable for different quantum algorithms.
+- **Comprehensive Documentation**: Includes manuals and examples for ease of use.
 
-## Installation
+## 📥 Installation
 #### Please check [Quplexity's pdf manual](https://github.com/MrGilli/Quplexity/blob/main/quplexity_manual.pdf) to learn how to use all Quplexity functions in your C/C++ project.
 
-### Dependencies
+### 🔹 Prerequisites
+Ensure the following dependencies are installed **before** building or running Quplex:
+- **nasm** → for Intel and x86 Assembly.
+- **as** → for ARM/ARM64 Assembly.
+- **gcc & g++** → for compiling C/C++ code.
+- **git** (optional) → for version control.
 
-Install the following to build/run Quplexity on your machine: 
-* nasm (for intel and x86 ASM)
-* as   (for ARM/ARM64 ASM)
-* gcc & g++
-* git (optional)
+### 🔹 Compilation and Linking
+
+#### 1️⃣ Compile Assembly Code
+```bash
+nasm -f elf64 assembly_file.asm -o assembly_object_file.o
 
 ### Compiling and Linking!
 
