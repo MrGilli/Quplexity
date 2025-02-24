@@ -177,7 +177,7 @@ _H:
     MOV X4, #1
     //SUB X3, X3, X4
     STR D2, [X1, #0]         // Store D2 (sqrt2_inv) at address X1 (statevector[0])
-    ADD X6, X1, X3, lsl #4  // Get address of statevector[x3]
+    ADD X6, X1, X3, lsl #4   // Get address of statevector[x3]
     STR D2, [X6]
 
     RET
