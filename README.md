@@ -56,5 +56,5 @@ gcc -no-pie ./Examples/x86/Grovers-Search_algorithm.c ./x86/gates.o -o grovers_s
 The output should indicate whether the state |1> or |0> is most likely. 
 
 ## Author(s)
-* [Jacob Gill]{Founder & Lead developer}(Contact: Email = jacobygill@outlook.com, Discord = @bixel0)  
-* [Gabriella Xenia Talarico]{Lead developer}(Contact: Discord = @gabriellaxenia19)
+* Jacob Gill {Founder & Lead developer} (Contact: Email = jacobygill@outlook.com, Discord = @bixel0) 
+* Gabriella Xenia Talarico {Lead developer} (Contact: Discord = @gabriellaxenia19)
