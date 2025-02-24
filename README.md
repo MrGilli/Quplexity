@@ -23,7 +23,7 @@ Install the following to build/run Quplexity on your machine:
 
 After you installed the dependencies and ensured everything is working your ready to start using Quplexity:
 ###### Compiling:
-![carbon](https://github.com/user-attachments/assets/b86fc191-dd42-43f9-b7b5-f56cc8d7a4ec)
+![carbon](https://github.com/user-attachments/assets/4459ec75-1cb8-4230-9982-6f2b337db9f4)
 ###### Then link with your C/C++ file:
 ![carbon (1)](https://github.com/user-attachments/assets/8d911822-c024-4939-8d36-033643051b39)
 
