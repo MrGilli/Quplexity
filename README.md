@@ -3,8 +3,7 @@
 ![OS](https://img.shields.io/badge/os-Linux-9cbd3c.svg)
 ![OS](https://img.shields.io/badge/os-Windows-9cbd3c.svg)
 
-# Quplex![Quplexity](https://github.com/user-attachments/assets/0727a094-8ba3-4126-b147-6610157cfb2a)
-ity
+# Quplex
 
 Quplexity is a blazingly fast and lightweight (modular) library that provides Quantum Computer simulators with their mathematical and essential quantum logic gates or functions. Quplexity is written in x86 and ARM64(Aarch64) Assembly for fast execution and computational times. The library can significantly enhance the speed of Quantum Computer simulators, as a result of this, more complex algorithms and sequences can be simulated in an efficient yet accurate manner. Quplexity has exstensive and carefully crafted documentation, to help anyone no matter what their technological fluency is, to integrate Quplexity into their project or contribute to the project itself.
 
@@ -24,17 +23,12 @@ Install the following to build/run Quplexity on your machine:
 
 After you installed the dependencies and ensured everything is working your ready to start using Quplexity:
 ###### Compiling:
-```bash
-nasm -f elf64 assembly_file.asm -o assembly_object_file.o
-```
+![carbon](https://github.com/user-attachments/assets/b86fc191-dd42-43f9-b7b5-f56cc8d7a4ec)
 ###### Then link with your C/C++ file:
-```bash
-gcc -no-pie c_file.c assembly_object_file.o -o test
-```
+![carbon (1)](https://github.com/user-attachments/assets/8d911822-c024-4939-8d36-033643051b39)
+
 ###### To run the example above:
-```bash
-./test
-```
+![carbon (2)](https://github.com/user-attachments/assets/ac9b7b9c-a100-4446-b12a-3002e21ca3f0)
 
 ## Projects Using Quplexity
 To add your project, email me or submit a pull request.
