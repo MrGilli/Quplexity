@@ -63,4 +63,4 @@ We are excited to welcome contributors from all backgrounds! Whether you're fixi
 
 ## ✍️ Author(s)
 * Jacob Gill - Founder & Lead developer - Contact: Email = jacobygill@outlook.com, Discord = @bixel0
-* Gabriella Xenia Talarico - Lead developer Contact: Discord = @gabriellaxenia19
+* Gabriella Xenia Talarico - Lead developer - Contact: Discord = @gabriellaxenia19
