@@ -25,34 +25,27 @@ Ensure the following dependencies are installed **before** building or running Q
 
 ### 🔹 Compilation and Linking
 
-#### 1️⃣ Compile Assembly Code
-```bash
-nasm -f elf64 assembly_file.asm -o assembly_object_file.o
-
-### Compiling and Linking!
-
-After you installed the dependencies and ensured everything is working your ready to start using Quplexity:
-###### Compiling:
+###### Compile Assembly Code:
 ```bash
 nasm -f elf64 assembly_file.asm -o assembly_object_file.o
 ```
-###### Then link with your C/C++ file:
+###### Link with your C/C++ file:
 ```bash
 gcc -no-pie c_file.c assembly_object_file.o -o test
 ```
-###### To run the example above:
+###### Run:
 ```bash
 ./test
 ```
 
-## Projects Using Quplexity
+## 🚀 Projects Using Quplexity
 To add your project, email me or submit a pull request.
 * [Qrack](https://github.com/unitaryfund/qrack) - Fast Quantum Computer Simulator/Emulator.
 * [LLY-DML](https://github.com/LILY-QML/LLY-DML) - Quantum Machine Learning model.
 * [theQ & Quantum Quokka](https://github.com/devitt1/theQ) - Quantum Computing simulation project, By Dr. S.J. Devitt and Prof. C. Ferrie at QSI@UTS
 
 
-## Quplexity Algorithm Examples:
+## 🧪 Quplexity Algorithm Examples:
 The Quplexity library has many examples and tests to ensure that its implemented and functioning as it should be. All examples are located in the ./Examples folder.
 The directory ./Examples/x86 holds all the examples that will run on machines using the x86 architecture. Conversely, the directory ./Examples/ARM64 holds all the examples that will run on machines using the ARM64/Aarch64 architecture. 
 
