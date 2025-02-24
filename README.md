@@ -23,12 +23,17 @@ Install the following to build/run Quplexity on your machine:
 
 After you installed the dependencies and ensured everything is working your ready to start using Quplexity:
 ###### Compiling:
-![carbon](https://github.com/user-attachments/assets/4459ec75-1cb8-4230-9982-6f2b337db9f4)
+```bash
+nasm -f elf64 assembly_file.asm -o assembly_object_file.o
+```
 ###### Then link with your C/C++ file:
-![carbon (1)](https://github.com/user-attachments/assets/8d911822-c024-4939-8d36-033643051b39)
-
+```bash
+gcc -no-pie c_file.c assembly_object_file.o -o test
+```
 ###### To run the example above:
-![carbon (2)](https://github.com/user-attachments/assets/ac9b7b9c-a100-4446-b12a-3002e21ca3f0)
+```bash
+./test
+```
 
 ## Projects Using Quplexity
 To add your project, email me or submit a pull request.
