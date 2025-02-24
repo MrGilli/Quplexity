@@ -10,7 +10,7 @@ Quplexity is a blazingly fast and lightweight (modular) library that provides Qu
 ## 📌 Features
 - **Optimized for Performance**: Written in low-level Assembly for maximum efficiency.
 - **Support of Multiple Architectures**: Supports both x86 and ARM64 architectures.
-- **Modular Design**: Easily extendable for different quantum algorithms.
+- **Modular Design**: Easily extendable for different quantum algorithms and simulators/programs.
 - **Comprehensive Documentation**: Includes manuals and examples for ease of use.
 
 ## 📥 Installation
