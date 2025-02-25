@@ -21,7 +21,7 @@ Ensure the following dependencies are installed **before** building or running Q
 - **nasm** → for Intel and x86 Assembly.
 - **as** → for ARM/ARM64 Assembly.
 - **gcc & g++** → for compiling C/C++ code.
-- **git** (optional) → for version control.
+- **git** (optional) → to download Quplexity via CLI.
 
 ### 🔹 Compilation and Linking
 
